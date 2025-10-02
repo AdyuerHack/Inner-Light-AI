@@ -17,7 +17,7 @@ El proyecto está diseñado para un **contexto académico de 2 meses**, prioriza
 
 ---
 
-## 📦 Alcance del MVP (2 meses – proyecto individual)  
+## 📦 Alcance del MVP   
 
 - **Incluye:** Diario emocional, análisis de sentimientos, meditaciones guiadas simples, comunidad anónima básica, chat IA 24/7 limitado, seguridad y anonimato de datos.  
 - **Opcionales:** Recordatorios, emparejamiento con mentores pares, música terapéutica, mapa visual del progreso.  
