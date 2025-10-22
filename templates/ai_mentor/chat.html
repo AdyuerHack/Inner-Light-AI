@@ -1,0 +1,207 @@
+{% extends "base.html" %}
+
+{% block title %}Mentor IA 24/7 - Inner Light AI{% endblock %}
+
+{% block content %}
+<div class="animate-fade-in">
+    <div class="grid lg:grid-cols-4 gap-6">
+        <!-- Sidebar: Sessions List -->
+        <div class="lg:col-span-1">
+            <div class="bg-white rounded-xl shadow-md p-6 sticky top-4">
+                <h3 class="text-xl font-semibold text-gray-900 mb-4">
+                    <i class="fas fa-history mr-2 text-purple-600"></i>
+                    Conversaciones
+                </h3>
+                
+                <button onclick="newSession()" 
+                        class="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3 rounded-lg font-semibold mb-4 hover:shadow-lg transition">
+                    <i class="fas fa-plus mr-2"></i>
+                    Nueva Conversación
+                </button>
+                
+                <div class="space-y-2 max-h-96 overflow-y-auto">
+                    {% if sessions %}
+                        {% for session in sessions %}
+                        <a href="{% url 'ai_mentor:session_detail' session.id %}" 
+                           class="block p-3 rounded-lg hover:bg-purple-50 transition {% if current_session and current_session.id == session.id %}bg-purple-100{% else %}bg-gray-50{% endif %}">
+                            <div class="font-medium text-gray-900 truncate">{{ session.title }}</div>
+                            <div class="text-xs text-gray-500">{{ session.updated_at|date:"d/m/Y H:i" }}</div>
+                        </a>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-sm text-gray-500 text-center py-4">
+                            No hay conversaciones aún
+                        </p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Chat Area -->
+        <div class="lg:col-span-3">
+            <div class="bg-white rounded-xl shadow-lg h-[600px] flex flex-col">
+                <!-- Chat Header -->
+                <div class="gradient-bg text-white p-6 rounded-t-xl">
+                    <div class="flex items-center space-x-4">
+                        <div class="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center">
+                            <i class="fas fa-sun text-yellow-300 text-2xl"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-2xl font-bold">Luz Interior</h2>
+                            <p class="text-sm opacity-90">Tu mentor espiritual y emocional</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Messages Area -->
+                <div id="messages-container" class="flex-1 overflow-y-auto p-6 space-y-4">
+                    {% if current_session %}
+                        {% for message in current_session.messages.all %}
+                        <div class="flex {% if message.role == 'user' %}justify-end{% else %}justify-start{% endif %}">
+                            <div class="max-w-md {% if message.role == 'user' %}bg-purple-600 text-white{% else %}bg-gray-100 text-gray-900{% endif %} rounded-2xl px-6 py-3">
+                                <p class="whitespace-pre-wrap">{{ message.content }}</p>
+                                <div class="text-xs opacity-70 mt-2">
+                                    {{ message.created_at|date:"H:i" }}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="flex flex-col items-center justify-center h-full text-center">
+                            <i class="fas fa-comments text-gray-300 text-6xl mb-4"></i>
+                            <h3 class="text-2xl font-semibold text-gray-900 mb-2">
+                                Bienvenido al Mentor IA
+                            </h3>
+                            <p class="text-gray-600 max-w-md">
+                                Estoy aquí para acompañarte en tu camino de crecimiento emocional y espiritual. 
+                                ¿Qué te trae por aquí hoy?
+                            </p>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Input Area -->
+                <div class="border-t border-gray-200 p-4">
+                    <form onsubmit="sendMessage(event)" class="flex space-x-3">
+                        <input type="text" 
+                               id="message-input" 
+                               class="flex-1 px-4 py-3 border border-gray-300 rounded-full focus:ring-2 focus:ring-purple-500 focus:border-transparent" 
+                               placeholder="Escribe tu mensaje..."
+                               required>
+                        <button type="submit" 
+                                id="send-button"
+                                class="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-6 py-3 rounded-full font-semibold hover:shadow-lg transition">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </form>
+                    <p class="text-xs text-gray-500 mt-2 text-center">
+                        <i class="fas fa-info-circle mr-1"></i>
+                        Tus conversaciones son privadas y anónimas
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<input type="hidden" id="current-session-id" value="{% if current_session %}{{ current_session.id }}{% endif %}">
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    async function sendMessage(e) {
+        e.preventDefault();
+        
+        const input = document.getElementById('message-input');
+        const message = input.value.trim();
+        if (!message) return;
+        
+        const sessionId = document.getElementById('current-session-id').value;
+        const sendBtn = document.getElementById('send-button');
+        
+        // Disable input
+        input.disabled = true;
+        sendBtn.disabled = true;
+        sendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+        
+        // Add user message to UI
+        addMessageToUI(message, 'user');
+        input.value = '';
+        
+        try {
+            const response = await fetch('{% url "ai_mentor:send_message" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({
+                    message: message,
+                    session_id: sessionId || null
+                })
+            });
+            
+            const data = await response.json();
+            if (data.success) {
+                // Update session ID if new
+                if (!sessionId) {
+                    document.getElementById('current-session-id').value = data.session_id;
+                }
+                
+                // Add assistant response
+                addMessageToUI(data.assistant_message.content, 'assistant');
+            } else {
+                alert('Error: ' + data.error);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Error al enviar el mensaje');
+        } finally {
+            input.disabled = false;
+            sendBtn.disabled = false;
+            sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i>';
+            input.focus();
+        }
+    }
+
+    function addMessageToUI(content, role) {
+        const container = document.getElementById('messages-container');
+        
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `flex ${role === 'user' ? 'justify-end' : 'justify-start'}`;
+        
+        const bubble = document.createElement('div');
+        bubble.className = `max-w-md ${role === 'user' ? 'bg-purple-600 text-white' : 'bg-gray-100 text-gray-900'} rounded-2xl px-6 py-3`;
+        
+        const contentP = document.createElement('p');
+        contentP.className = 'whitespace-pre-wrap';
+        contentP.textContent = content;
+        
+        const time = document.createElement('div');
+        time.className = 'text-xs opacity-70 mt-2';
+        time.textContent = new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+        
+        bubble.appendChild(contentP);
+        bubble.appendChild(time);
+        messageDiv.appendChild(bubble);
+        container.appendChild(messageDiv);
+        
+        // Scroll to bottom
+        container.scrollTop = container.scrollHeight;
+    }
+
+    async function newSession() {
+        const response = await fetch('{% url "ai_mentor:new_session" %}', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        });
+        
+        const data = await response.json();
+        if (data.success) {
+            window.location.href = `/mentor/session/${data.session_id}/`;
+        }
+    }
+</script>
+{% endblock %}

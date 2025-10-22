@@ -1,0 +1,216 @@
+{% extends "base.html" %}
+
+{% block title %}{{ meditation.title }} - Inner Light AI{% endblock %}
+
+{% block content %}
+<div class="animate-fade-in max-w-4xl mx-auto">
+    <!-- Back button -->
+    <a href="{% url 'meditation:list' %}" class="inline-flex items-center text-gray-600 hover:text-gray-900 mb-6">
+        <i class="fas fa-arrow-left mr-2"></i>
+        Volver a meditaciones
+    </a>
+
+    <!-- Meditation Card -->
+    <div class="bg-white rounded-2xl shadow-xl p-8 mb-8">
+        <div class="flex justify-between items-start mb-6">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900 mb-2">
+                    {{ meditation.title }}
+                </h1>
+                <div class="flex items-center space-x-4 text-sm text-gray-600">
+                    <span>
+                        <i class="fas fa-clock mr-1"></i>
+                        {{ meditation.duration_minutes }} minutos
+                    </span>
+                    <span class="px-3 py-1 bg-purple-100 text-purple-800 rounded-full">
+                        {{ meditation.get_emotion_target_display }}
+                    </span>
+                </div>
+            </div>
+            <div class="w-20 h-20 bg-gradient-to-br from-green-400 to-teal-500 rounded-full flex items-center justify-center">
+                <i class="fas fa-spa text-white text-3xl"></i>
+            </div>
+        </div>
+
+        <p class="text-lg text-gray-700 mb-6">
+            {{ meditation.description }}
+        </p>
+
+        <!-- Meditation Script -->
+        <div class="bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl p-6 mb-6">
+            <h3 class="text-xl font-semibold text-gray-900 mb-4">Guión de Meditación</h3>
+            <div class="text-gray-700 leading-relaxed whitespace-pre-wrap">{{ meditation.script }}</div>
+        </div>
+
+        <!-- Emotion Check -->
+        <div class="mb-6" id="pre-meditation">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">¿Cómo te sientes ahora?</h3>
+            <div class="grid grid-cols-4 gap-3">
+                <button onclick="selectEmotion('ansioso')" class="emotion-btn p-4 rounded-lg border-2 border-gray-200 hover:border-purple-500 transition">
+                    <i class="fas fa-wind text-3xl mb-2 text-orange-500"></i>
+                    <div class="text-sm">Ansioso</div>
+                </button>
+                <button onclick="selectEmotion('triste')" class="emotion-btn p-4 rounded-lg border-2 border-gray-200 hover:border-purple-500 transition">
+                    <i class="fas fa-cloud-rain text-3xl mb-2 text-purple-500"></i>
+                    <div class="text-sm">Triste</div>
+                </button>
+                <button onclick="selectEmotion('estresado')" class="emotion-btn p-4 rounded-lg border-2 border-gray-200 hover:border-purple-500 transition">
+                    <i class="fas fa-bolt text-3xl mb-2 text-gray-500"></i>
+                    <div class="text-sm">Estresado</div>
+                </button>
+                <button onclick="selectEmotion('neutral')" class="emotion-btn p-4 rounded-lg border-2 border-gray-200 hover:border-purple-500 transition">
+                    <i class="fas fa-balance-scale text-3xl mb-2 text-teal-500"></i>
+                    <div class="text-sm">Neutral</div>
+                </button>
+            </div>
+        </div>
+
+        <!-- Start Button -->
+        <button id="start-btn" onclick="startMeditation()" 
+                class="w-full bg-gradient-to-r from-green-500 to-teal-500 text-white py-4 rounded-xl text-lg font-semibold hover:shadow-lg transition-all transform hover:scale-105">
+            <i class="fas fa-play-circle mr-2 text-2xl"></i>
+            Comenzar Meditación
+        </button>
+
+        <!-- Timer (hidden initially) -->
+        <div id="meditation-timer" class="hidden text-center">
+            <div class="text-6xl font-bold text-purple-600 mb-4" id="timer-display">
+                {{ meditation.duration_minutes }}:00
+            </div>
+            <div class="space-y-3">
+                <button id="pause-btn" onclick="togglePause()" 
+                        class="bg-yellow-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-yellow-600 transition">
+                    <i class="fas fa-pause"></i> Pausar
+                </button>
+                <button id="complete-btn" onclick="completeMeditation()" 
+                        class="bg-green-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-600 transition ml-3">
+                    <i class="fas fa-check"></i> Completar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Previous Sessions -->
+    {% if previous_sessions %}
+    <div class="bg-white rounded-xl shadow-md p-6">
+        <h3 class="text-xl font-semibold text-gray-900 mb-4">Sesiones Anteriores</h3>
+        <div class="space-y-3">
+            {% for session in previous_sessions %}
+            <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                <span class="text-sm text-gray-600">
+                    {{ session.created_at|date:"d/m/Y H:i" }}
+                </span>
+                <span class="text-sm font-medium text-green-600">
+                    <i class="fas fa-check-circle mr-1"></i>Completada
+                </span>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<input type="hidden" id="meditation-id" value="{{ meditation.id }}">
+<input type="hidden" id="session-id" value="">
+<input type="hidden" id="emotion-before" value="">
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let timerInterval;
+    let isPaused = false;
+    let secondsRemaining = {{ meditation.duration_minutes }} * 60;
+    let sessionId = null;
+    let emotionBefore = '';
+
+    function selectEmotion(emotion) {
+        emotionBefore = emotion;
+        document.getElementById('emotion-before').value = emotion;
+        document.querySelectorAll('.emotion-btn').forEach(btn => {
+            btn.classList.remove('border-purple-500', 'bg-purple-50');
+        });
+        event.target.closest('.emotion-btn').classList.add('border-purple-500', 'bg-purple-50');
+    }
+
+    async function startMeditation() {
+        const meditationId = document.getElementById('meditation-id').value;
+        
+        // Start session
+        const response = await fetch(`/meditation/${meditationId}/start/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': '{{ csrf_token }}',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: `emotion_before=${emotionBefore}`
+        });
+        
+        const data = await response.json();
+        if (data.success) {
+            sessionId = data.session_id;
+            document.getElementById('session-id').value = sessionId;
+            
+            // Hide pre-meditation, show timer
+            document.getElementById('pre-meditation').classList.add('hidden');
+            document.getElementById('start-btn').classList.add('hidden');
+            document.getElementById('meditation-timer').classList.remove('hidden');
+            
+            // Start timer
+            startTimer();
+        }
+    }
+
+    function startTimer() {
+        timerInterval = setInterval(() => {
+            if (!isPaused && secondsRemaining > 0) {
+                secondsRemaining--;
+                updateTimerDisplay();
+                
+                if (secondsRemaining === 0) {
+                    clearInterval(timerInterval);
+                    completeMeditation();
+                }
+            }
+        }, 1000);
+    }
+
+    function updateTimerDisplay() {
+        const minutes = Math.floor(secondsRemaining / 60);
+        const seconds = secondsRemaining % 60;
+        document.getElementById('timer-display').textContent = 
+            `${minutes}:${seconds.toString().padStart(2, '0')}`;
+    }
+
+    function togglePause() {
+        isPaused = !isPaused;
+        document.getElementById('pause-btn').innerHTML = isPaused ? 
+            '<i class="fas fa-play"></i> Reanudar' : 
+            '<i class="fas fa-pause"></i> Pausar';
+    }
+
+    async function completeMeditation() {
+        clearInterval(timerInterval);
+        
+        const durationActual = Math.ceil(({{ meditation.duration_minutes }} * 60 - secondsRemaining) / 60);
+        
+        const response = await fetch(`/meditation/session/${sessionId}/complete/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({
+                duration_actual: durationActual,
+                emotion_after: 'calma'
+            })
+        });
+        
+        const data = await response.json();
+        if (data.success) {
+            alert('¡Meditación completada! 🙏✨');
+            window.location.reload();
+        }
+    }
+</script>
+{% endblock %}

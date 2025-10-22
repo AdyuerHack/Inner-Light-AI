@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+
+{% block title %}Meditaciones Guiadas - Inner Light AI{% endblock %}
+
+{% block content %}
+<div class="animate-fade-in">
+    <!-- Header -->
+    <div class="text-center mb-12">
+        <h1 class="text-4xl font-bold text-gray-900 mb-4">
+            <i class="fas fa-spa text-green-600"></i> Meditaciones Guiadas
+        </h1>
+        <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+            Encuentra paz interior con meditaciones adaptadas a tu estado emocional
+        </p>
+    </div>
+
+    <!-- Emotion Filter -->
+    <div class="bg-white rounded-xl shadow-md p-6 mb-8">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">Filtrar por emoción:</h3>
+        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
+            <a href="{% url 'meditation:list' %}" class="text-center p-4 rounded-lg hover:shadow-md transition {% if not selected_emotion %}bg-gradient-to-br from-purple-500 to-pink-500 text-white{% else %}bg-gray-100 text-gray-700{% endif %}">
+                <i class="fas fa-infinity text-2xl mb-2"></i>
+                <div class="text-sm font-medium">Todas</div>
+            </a>
+            <a href="?emotion=calm" class="text-center p-4 rounded-lg hover:shadow-md transition {% if selected_emotion == 'calm' %}bg-gradient-to-br from-blue-400 to-blue-600 text-white{% else %}bg-gray-100 text-gray-700{% endif %}">
+                <i class="fas fa-water text-2xl mb-2"></i>
+                <div class="text-sm font-medium">Calma</div>
+            </a>
+            <a href="?emotion=anxious" class="text-center p-4 rounded-lg hover:shadow-md transition {% if selected_emotion == 'anxious' %}bg-gradient-to-br from-yellow-400 to-orange-500 text-white{% else %}bg-gray-100 text-gray-700{% endif %}">
+                <i class="fas fa-wind text-2xl mb-2"></i>
+                <div class="text-sm font-medium">Ansiedad</div>
+            </a>
+            <a href="?emotion=sad" class="text-center p-4 rounded-lg hover:shadow-md transition {% if selected_emotion == 'sad' %}bg-gradient-to-br from-indigo-400 to-purple-600 text-white{% else %}bg-gray-100 text-gray-700{% endif %}">
+                <i class="fas fa-cloud-rain text-2xl mb-2"></i>
+                <div class="text-sm font-medium">Tristeza</div>
+            </a>
+            <a href="?emotion=angry" class="text-center p-4 rounded-lg hover:shadow-md transition {% if selected_emotion == 'angry' %}bg-gradient-to-br from-red-400 to-pink-600 text-white{% else %}bg-gray-100 text-gray-700{% endif %}">
+                <i class="fas fa-fire text-2xl mb-2"></i>
+                <div class="text-sm font-medium">Enojo</div>
+            </a>
+            <a href="?emotion=joyful" class="text-center p-4 rounded-lg hover:shadow-md transition {% if selected_emotion == 'joyful' %}bg-gradient-to-br from-yellow-300 to-yellow-500 text-white{% else %}bg-gray-100 text-gray-700{% endif %}">
+                <i class="fas fa-sun text-2xl mb-2"></i>
+                <div class="text-sm font-medium">Alegría</div>
+            </a>
+            <a href="?emotion=stressed" class="text-center p-4 rounded-lg hover:shadow-md transition {% if selected_emotion == 'stressed' %}bg-gradient-to-br from-gray-400 to-gray-600 text-white{% else %}bg-gray-100 text-gray-700{% endif %}">
+                <i class="fas fa-bolt text-2xl mb-2"></i>
+                <div class="text-sm font-medium">Estrés</div>
+            </a>
+            <a href="?emotion=neutral" class="text-center p-4 rounded-lg hover:shadow-md transition {% if selected_emotion == 'neutral' %}bg-gradient-to-br from-teal-400 to-teal-600 text-white{% else %}bg-gray-100 text-gray-700{% endif %}">
+                <i class="fas fa-balance-scale text-2xl mb-2"></i>
+                <div class="text-sm font-medium">Neutral</div>
+            </a>
+        </div>
+    </div>
+
+    <!-- Meditations by Emotion -->
+    {% if meditations_by_emotion %}
+        {% for emotion, meditations in meditations_by_emotion.items %}
+        <div class="mb-10">
+            <h2 class="text-2xl font-semibold text-gray-900 mb-6 flex items-center">
+                {% if emotion == 'calm' %}<i class="fas fa-water text-blue-500 mr-3"></i>Calma
+                {% elif emotion == 'anxious' %}<i class="fas fa-wind text-orange-500 mr-3"></i>Ansiedad
+                {% elif emotion == 'sad' %}<i class="fas fa-cloud-rain text-purple-500 mr-3"></i>Tristeza
+                {% elif emotion == 'angry' %}<i class="fas fa-fire text-red-500 mr-3"></i>Enojo
+                {% elif emotion == 'joyful' %}<i class="fas fa-sun text-yellow-500 mr-3"></i>Alegría
+                {% elif emotion == 'stressed' %}<i class="fas fa-bolt text-gray-500 mr-3"></i>Estrés
+                {% else %}<i class="fas fa-balance-scale text-teal-500 mr-3"></i>Neutral{% endif %}
+            </h2>
+            
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {% for meditation in meditations %}
+                <div class="bg-white rounded-xl shadow-md hover:shadow-xl transition-all p-6">
+                    <div class="flex justify-between items-start mb-4">
+                        <h3 class="text-xl font-semibold text-gray-900">
+                            {{ meditation.title }}
+                        </h3>
+                        <span class="px-3 py-1 bg-green-100 text-green-800 text-sm font-medium rounded-full">
+                            {{ meditation.duration_minutes }} min
+                        </span>
+                    </div>
+                    
+                    <p class="text-gray-600 mb-4">
+                        {{ meditation.description }}
+                    </p>
+                    
+                    <a href="{% url 'meditation:detail' meditation.id %}" 
+                       class="block w-full text-center bg-gradient-to-r from-green-500 to-teal-500 text-white py-3 rounded-lg font-semibold hover:shadow-lg transition">
+                        <i class="fas fa-play-circle mr-2"></i>
+                        Comenzar
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="bg-gray-50 rounded-lg p-12 text-center">
+            <i class="fas fa-spa text-gray-300 text-6xl mb-4"></i>
+            <p class="text-gray-600 text-lg">
+                No hay meditaciones disponibles para esta emoción aún.
+            </p>
+        </div>
+    {% endif %}
+
+    <!-- My Sessions Link -->
+    {% if user.is_authenticated %}
+    <div class="mt-12 text-center">
+        <a href="{% url 'meditation:my_sessions' %}" class="inline-flex items-center text-purple-600 hover:text-purple-700 font-medium">
+            <i class="fas fa-history mr-2"></i>
+            Ver mi historial de meditaciones
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
