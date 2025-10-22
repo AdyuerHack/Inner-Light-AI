@@ -2,7 +2,7 @@
 
 **Inner Light AI** es un prototipo de aplicación web con inteligencia artificial que funciona como un **mentor personal 24/7**, acompañando a los usuarios en su crecimiento emocional y espiritual.  
 
-El proyecto está diseñado para un **contexto académico de 2 meses**, priorizando funcionalidades esenciales (MVP) bajo la metodología **MoSCoW**.  
+El proyecto está diseñado para un **contexto academico**, priorizando funcionalidades esenciales (MVP) bajo la metodología **MoSCoW**.  
 
 ---
 
