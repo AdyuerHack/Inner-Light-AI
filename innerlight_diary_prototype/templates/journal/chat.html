@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Mentor IA (MVP)</h2>
+<form method="post">
+  {% csrf_token %}
+  <input type="text" name="message" placeholder="Cuéntame, ¿cómo te sientes ahora?" style="width:100%;padding:.5rem" />
+  <br>
+  <button type="submit">Enviar</button>
+</form>
+{% if reply %}
+  <div class="entry" style="margin-top:1rem">
+    <strong>Mentor:</strong> {{ reply }}
+  </div>
+{% endif %}
+<p style="margin-top:1rem"><small>Nota: Respuestas generadas por reglas simples en el MVP.</small></p>
+{% endblock %}

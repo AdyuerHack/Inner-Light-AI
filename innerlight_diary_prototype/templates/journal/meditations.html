@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Meditaciones guiadas simples</h2>
+{% if last %}
+  <p>Según tu último estado ({{ last.tone|default:last.sentiment_label|default:"neutral" }}), te recomiendo:</p>
+{% endif %}
+<ul>
+  <li><strong>Respiración 4-4-4</strong>: Inhala 4, retén 4, exhala 4. 3 minutos.</li>
+  <li><strong>Gratitud breve</strong>: Piensa en 3 cosas por las que agradeces hoy.</li>
+  <li><strong>Escaneo corporal</strong>: Recorre tu cuerpo soltando tensión. 5 minutos.</li>
+</ul>
+<p>Más adelante: audio guiado y personalización.</p>
+{% endblock %}

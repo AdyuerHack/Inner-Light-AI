@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Comunidad anónima</h2>
+<form method="post">
+  {% csrf_token %}
+  <textarea name="content" placeholder="Comparte una reflexión breve" style="width:100%;min-height:80px"></textarea>
+  <br>
+  <label>Estado:</label>
+  <select name="mood">
+    <option value="">—</option>
+    <option>agradecido</option>
+    <option>alegre</option>
+    <option>ansioso</option>
+    <option>triste</option>
+    <option>en paz</option>
+  </select>
+  <button type="submit">Publicar</button>
+</form>
+
+<h3>Recientes</h3>
+{% if posts %}
+  {% for p in posts %}
+    <div class="entry">
+      <small>{{ p.created_at|date:"Y-m-d H:i" }} · {{ p.mood|default:"—" }}</small>
+      <div>{{ p.content|linebreaksbr }}</div>
+    </div>
+  {% endfor %}
+{% else %}
+  <p>Aún no hay publicaciones.</p>
+{% endif %}
+{% endblock %}

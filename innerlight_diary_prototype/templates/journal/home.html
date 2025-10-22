@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Escribe tus emociones y pensamientos</h2>
+<form method="post" action="{% url 'journal:create' %}">
+  {% csrf_token %}
+  <textarea name="content" placeholder="¿Cómo te sientes hoy?"></textarea>
+  <br>
+  <button type="submit">Guardar entrada</button>
+</form>
+
+<h3>Tus últimas entradas</h3>
+{% if entries %}
+  {% for e in entries %}
+    <div class="entry">
+      <div><strong>{{ e.created_at|date:"Y-m-d H:i" }}</strong></div>
+      <div>{{ e.content|linebreaksbr }}</div>
+      {% if e.sentiment_label %}
+        <small>Sentimiento: {{ e.sentiment_label }} ({{ e.sentiment_score }}) · Tono: {{ e.tone }}</small>
+      {% endif %}
+    </div>
+  {% endfor %}
+{% else %}
+  <p>Aún no hay entradas.</p>
+{% endif %}
+{% endblock %}
