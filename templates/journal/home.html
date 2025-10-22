@@ -1,0 +1,193 @@
+{% extends "base.html" %}
+
+{% block title %}Diario Emocional - Inner Light AI{% endblock %}
+
+{% block content %}
+<div class="animate-fade-in">
+    <!-- Header -->
+    <div class="mb-8">
+        <h1 class="text-4xl font-bold text-gray-900 mb-2">
+            <i class="fas fa-book text-blue-600"></i> Mi Diario Emocional
+        </h1>
+        <p class="text-gray-600">
+            Un espacio seguro para explorar tus pensamientos y emociones
+        </p>
+    </div>
+
+    <!-- Stats (if authenticated) -->
+    {% if stats %}
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <div class="text-3xl font-bold text-blue-600">{{ stats.total }}</div>
+            <div class="text-gray-600 text-sm">Entradas totales</div>
+        </div>
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <div class="text-3xl font-bold text-green-600">{{ stats.this_week }}</div>
+            <div class="text-gray-600 text-sm">Esta semana</div>
+        </div>
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <div class="text-3xl font-bold text-purple-600">
+                <i class="fas fa-heart"></i>
+            </div>
+            <div class="text-gray-600 text-sm">Cuidando tu bienestar</div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- New Entry Form -->
+    <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+        <h2 class="text-2xl font-semibold text-gray-900 mb-4">
+            ¿Cómo te sientes hoy?
+        </h2>
+        <form method="post" action="{% url 'journal:create' %}" id="journal-form">
+            {% csrf_token %}
+            <div class="mb-4">
+                <textarea 
+                    name="content" 
+                    id="journal-content"
+                    rows="6" 
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                    placeholder="Escribe libremente lo que sientes en tu corazón... No hay juicios aquí, solo comprensión."
+                    required
+                ></textarea>
+            </div>
+            
+            <!-- Real-time sentiment indicator -->
+            <div id="sentiment-indicator" class="mb-4 hidden">
+                <div class="flex items-center space-x-2 text-sm">
+                    <span class="text-gray-600">Emoción detectada:</span>
+                    <span id="sentiment-label" class="font-semibold px-3 py-1 rounded-full"></span>
+                </div>
+            </div>
+
+            <div class="flex justify-between items-center">
+                <button 
+                    type="submit"
+                    class="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-3 rounded-full font-semibold hover:shadow-lg transition-all transform hover:scale-105"
+                >
+                    <i class="fas fa-paper-plane mr-2"></i>
+                    Guardar Entrada
+                </button>
+                <span class="text-sm text-gray-500">
+                    <i class="fas fa-lock mr-1"></i>
+                    Privado y seguro
+                </span>
+            </div>
+        </form>
+    </div>
+
+    <!-- Entries List -->
+    <div class="space-y-4">
+        <h2 class="text-2xl font-semibold text-gray-900 mb-4">
+            Mis Entradas Recientes
+        </h2>
+        
+        {% if entries %}
+            {% for entry in entries %}
+            <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition animate-fade-in">
+                <div class="flex justify-between items-start mb-3">
+                    <div class="flex items-center space-x-3">
+                        <span class="text-sm text-gray-500">
+                            <i class="fas fa-calendar-alt mr-1"></i>
+                            {{ entry.created_at|date:"d/m/Y H:i" }}
+                        </span>
+                        {% if entry.sentiment_label %}
+                            <span class="px-3 py-1 rounded-full text-xs font-medium
+                                {% if entry.sentiment_label == 'positive' %}bg-green-100 text-green-800
+                                {% elif entry.sentiment_label == 'negative' %}bg-red-100 text-red-800
+                                {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                {% if entry.sentiment_label == 'positive' %}😊 Positivo
+                                {% elif entry.sentiment_label == 'negative' %}😔 Negativo
+                                {% else %}😐 Neutral{% endif %}
+                            </span>
+                        {% endif %}
+                        {% if entry.tone %}
+                            <span class="px-3 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                                {{ entry.tone }}
+                            </span>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <p class="text-gray-700 leading-relaxed whitespace-pre-wrap">{{ entry.content }}</p>
+                
+                {% if entry.sentiment_score %}
+                    <div class="mt-4 pt-4 border-t border-gray-200">
+                        <div class="flex items-center justify-between text-sm text-gray-600">
+                            <span>Intensidad emocional:</span>
+                            <div class="flex items-center space-x-2">
+                                <div class="w-32 bg-gray-200 rounded-full h-2">
+                                    <div class="bg-gradient-to-r from-blue-500 to-purple-500 h-2 rounded-full" 
+                                         style="width: {{ entry.sentiment_score|add:1|multiply:50 }}%"></div>
+                                </div>
+                                <span class="font-medium">{{ entry.sentiment_score|floatformat:2 }}</span>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="bg-gray-50 rounded-lg p-12 text-center">
+                <i class="fas fa-book-open text-gray-300 text-6xl mb-4"></i>
+                <p class="text-gray-600 text-lg mb-4">
+                    Aún no has escrito ninguna entrada
+                </p>
+                <p class="text-gray-500">
+                    Comienza tu viaje de autoconocimiento escribiendo tu primera reflexión
+                </p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Real-time sentiment analysis preview
+    const textarea = document.getElementById('journal-content');
+    const indicator = document.getElementById('sentiment-indicator');
+    const sentimentLabel = document.getElementById('sentiment-label');
+    let timeoutId;
+
+    textarea.addEventListener('input', function() {
+        clearTimeout(timeoutId);
+        
+        if (this.value.length > 50) {
+            timeoutId = setTimeout(() => {
+                fetch('{% url "journal:analyze_sentiment" %}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: JSON.stringify({ text: textarea.value })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        indicator.classList.remove('hidden');
+                        const sentiment = data.analysis.sentiment_label;
+                        const tone = data.analysis.tone;
+                        
+                        let displayText = sentiment === 'positive' ? '😊 Positivo' : 
+                                        sentiment === 'negative' ? '😔 Negativo' : '😐 Neutral';
+                        if (tone) displayText += ` (${tone})`;
+                        
+                        sentimentLabel.textContent = displayText;
+                        sentimentLabel.className = `font-semibold px-3 py-1 rounded-full ${
+                            sentiment === 'positive' ? 'bg-green-100 text-green-800' :
+                            sentiment === 'negative' ? 'bg-red-100 text-red-800' :
+                            'bg-gray-100 text-gray-800'
+                        }`;
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+            }, 1000);
+        } else {
+            indicator.classList.add('hidden');
+        }
+    });
+</script>
+{% endblock %}

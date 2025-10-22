@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+
+{% block title %}Inner Light AI - Mentor Espiritual & Emocional 24/7{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="text-center animate-fade-in">
+    <div class="inline-block mb-8">
+        <i class="fas fa-sun text-8xl text-yellow-400 animate-pulse"></i>
+    </div>
+    <h1 class="text-5xl font-bold text-gray-900 mb-4">
+        Bienvenido a <span class="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600">Inner Light AI</span>
+    </h1>
+    <p class="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
+        Tu mentor espiritual y emocional disponible 24/7. Un espacio seguro y anónimo para tu crecimiento personal.
+    </p>
+</div>
+
+<!-- Features Grid -->
+<div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mt-12">
+    <!-- Diario Emocional -->
+    <a href="{% url 'journal:home' %}" class="glass-effect p-6 rounded-xl shadow-lg hover:shadow-2xl transition-all transform hover:-translate-y-2">
+        <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center mb-4">
+            <i class="fas fa-book text-white text-2xl"></i>
+        </div>
+        <h3 class="text-xl font-semibold text-gray-900 mb-2">Diario Emocional</h3>
+        <p class="text-gray-600 text-sm">
+            Registra tus pensamientos y emociones. Análisis de sentimientos automático con IA.
+        </p>
+        <div class="mt-4 text-blue-600 font-medium">
+            Comenzar <i class="fas fa-arrow-right ml-2"></i>
+        </div>
+    </a>
+
+    <!-- Meditaciones Guiadas -->
+    <a href="{% url 'meditation:list' %}" class="glass-effect p-6 rounded-xl shadow-lg hover:shadow-2xl transition-all transform hover:-translate-y-2">
+        <div class="w-16 h-16 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center mb-4">
+            <i class="fas fa-spa text-white text-2xl"></i>
+        </div>
+        <h3 class="text-xl font-semibold text-gray-900 mb-2">Meditaciones</h3>
+        <p class="text-gray-600 text-sm">
+            Meditaciones guiadas adaptadas a tu estado emocional. Encuentra tu paz interior.
+        </p>
+        <div class="mt-4 text-green-600 font-medium">
+            Explorar <i class="fas fa-arrow-right ml-2"></i>
+        </div>
+    </a>
+
+    <!-- Comunidad Anónima -->
+    <a href="{% url 'community:home' %}" class="glass-effect p-6 rounded-xl shadow-lg hover:shadow-2xl transition-all transform hover:-translate-y-2">
+        <div class="w-16 h-16 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full flex items-center justify-center mb-4">
+            <i class="fas fa-users text-white text-2xl"></i>
+        </div>
+        <h3 class="text-xl font-semibold text-gray-900 mb-2">Comunidad</h3>
+        <p class="text-gray-600 text-sm">
+            Comparte reflexiones de forma anónima. Apoya y recibe apoyo de otros viajeros.
+        </p>
+        <div class="mt-4 text-purple-600 font-medium">
+            Unirse <i class="fas fa-arrow-right ml-2"></i>
+        </div>
+    </a>
+
+    <!-- Mentor IA -->
+    <a href="{% url 'ai_mentor:chat_home' %}" class="glass-effect p-6 rounded-xl shadow-lg hover:shadow-2xl transition-all transform hover:-translate-y-2">
+        <div class="w-16 h-16 bg-gradient-to-br from-pink-500 to-pink-600 rounded-full flex items-center justify-center mb-4">
+            <i class="fas fa-comments text-white text-2xl"></i>
+        </div>
+        <h3 class="text-xl font-semibold text-gray-900 mb-2">Mentor IA 24/7</h3>
+        <p class="text-gray-600 text-sm">
+            Conversa con tu mentor espiritual inteligente. Disponible siempre que lo necesites.
+        </p>
+        <div class="mt-4 text-pink-600 font-medium">
+            Chatear <i class="fas fa-arrow-right ml-2"></i>
+        </div>
+    </a>
+</div>
+
+<!-- Info Cards -->
+<div class="grid md:grid-cols-3 gap-6 mt-16">
+    <div class="bg-white p-6 rounded-xl shadow-md">
+        <div class="flex items-center justify-center w-12 h-12 bg-purple-100 rounded-full mb-4">
+            <i class="fas fa-shield-alt text-purple-600 text-xl"></i>
+        </div>
+        <h4 class="font-semibold text-gray-900 mb-2">100% Anónimo</h4>
+        <p class="text-gray-600 text-sm">
+            Tu identidad está protegida. Comparte sin miedo al juicio.
+        </p>
+    </div>
+
+    <div class="bg-white p-6 rounded-xl shadow-md">
+        <div class="flex items-center justify-center w-12 h-12 bg-blue-100 rounded-full mb-4">
+            <i class="fas fa-brain text-blue-600 text-xl"></i>
+        </div>
+        <h4 class="font-semibold text-gray-900 mb-2">IA Empática</h4>
+        <p class="text-gray-600 text-sm">
+            Análisis de sentimientos y recomendaciones personalizadas con IA.
+        </p>
+    </div>
+
+    <div class="bg-white p-6 rounded-xl shadow-md">
+        <div class="flex items-center justify-center w-12 h-12 bg-green-100 rounded-full mb-4">
+            <i class="fas fa-heart text-green-600 text-xl"></i>
+        </div>
+        <h4 class="font-semibold text-gray-900 mb-2">Crecimiento Personal</h4>
+        <p class="text-gray-600 text-sm">
+            Herramientas probadas para tu bienestar emocional y espiritual.
+        </p>
+    </div>
+</div>
+
+<!-- CTA Section -->
+<div class="mt-16 gradient-bg rounded-2xl p-12 text-center text-white">
+    <h2 class="text-3xl font-bold mb-4">Comienza Tu Viaje Interior Hoy</h2>
+    <p class="text-lg mb-8 opacity-90">
+        Únete a miles de personas que han encontrado paz y claridad con Inner Light AI
+    </p>
+    <div class="flex justify-center space-x-4">
+        <a href="{% url 'journal:home' %}" class="bg-white text-purple-600 px-8 py-3 rounded-full font-semibold hover:bg-gray-100 transition">
+            Escribir en el Diario
+        </a>
+        <a href="{% url 'ai_mentor:chat_home' %}" class="bg-purple-800 text-white px-8 py-3 rounded-full font-semibold hover:bg-purple-900 transition">
+            Hablar con el Mentor
+        </a>
+    </div>
+</div>
+
+<!-- Disclaimer -->
+<div class="mt-12 p-6 bg-yellow-50 border-l-4 border-yellow-400 rounded-r-lg">
+    <div class="flex">
+        <div class="flex-shrink-0">
+            <i class="fas fa-info-circle text-yellow-400 text-xl"></i>
+        </div>
+        <div class="ml-3">
+            <p class="text-sm text-yellow-800">
+                <strong>Nota Importante:</strong> Inner Light AI es una herramienta de apoyo emocional y no reemplaza la ayuda profesional. 
+                Si estás experimentando una crisis, por favor contacta con servicios de salud mental profesionales.
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

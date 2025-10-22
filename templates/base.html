@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Inner Light AI - Mentor Espiritual & Emocional{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#6366f1',
+                        secondary: '#8b5cf6',
+                        accent: '#ec4899',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .glass-effect { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
+        .animate-fade-in { animation: fadeIn 0.5s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body class="h-full bg-gray-50">
+    <!-- Navigation -->
+    <nav class="gradient-bg shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <a href="/" class="flex items-center space-x-2">
+                        <i class="fas fa-sun text-yellow-300 text-2xl"></i>
+                        <span class="text-white font-bold text-xl">Inner Light AI</span>
+                    </a>
+                    <div class="hidden md:ml-10 md:flex md:space-x-8">
+                        <a href="{% url 'journal:home' %}" class="text-white hover:text-yellow-300 px-3 py-2 rounded-md text-sm font-medium transition">
+                            <i class="fas fa-book mr-2"></i>Diario
+                        </a>
+                        <a href="{% url 'meditation:list' %}" class="text-white hover:text-yellow-300 px-3 py-2 rounded-md text-sm font-medium transition">
+                            <i class="fas fa-spa mr-2"></i>Meditaciones
+                        </a>
+                        <a href="{% url 'community:home' %}" class="text-white hover:text-yellow-300 px-3 py-2 rounded-md text-sm font-medium transition">
+                            <i class="fas fa-users mr-2"></i>Comunidad
+                        </a>
+                        <a href="{% url 'ai_mentor:chat_home' %}" class="text-white hover:text-yellow-300 px-3 py-2 rounded-md text-sm font-medium transition">
+                            <i class="fas fa-comments mr-2"></i>Mentor IA
+                        </a>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    {% if user.is_authenticated %}
+                        <span class="text-white text-sm">Hola, {{ user.username }}</span>
+                        <a href="{% url 'logout' %}" class="bg-white text-purple-600 hover:bg-gray-100 px-4 py-2 rounded-full text-sm font-medium transition">
+                            Salir
+                        </a>
+                    {% else %}
+                        <a href="{% url 'login' %}" class="text-white hover:text-yellow-300 px-4 py-2 rounded-full text-sm font-medium transition">
+                            Ingresar
+                        </a>
+                        <span class="text-yellow-300 text-sm"><i class="fas fa-user-secret mr-1"></i>Modo Anónimo</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Messages -->
+    {% if messages %}
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
+            {% for message in messages %}
+                <div class="animate-fade-in p-4 rounded-lg mb-4 {% if message.tags == 'success' %}bg-green-100 text-green-800{% elif message.tags == 'error' %}bg-red-100 text-red-800{% else %}bg-blue-100 text-blue-800{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white mt-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="text-center">
+                <p class="text-gray-400">&copy; 2025 Inner Light AI - Adyuer de Jesús Ojeda Badel</p>
+                <p class="text-gray-500 text-sm mt-2">Proyecto Académico - Universidad EAFIT</p>
+                <p class="text-gray-500 text-xs mt-4">
+                    <i class="fas fa-shield-alt mr-1"></i>Tu privacidad es sagrada. Todas las conversaciones son anónimas y seguras.
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
