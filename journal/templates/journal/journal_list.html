@@ -1,0 +1,12 @@
+{% extends 'journal/base_journal.html' %}
+{% block content %}
+<h2>Mis entradas 🌼</h2>
+{% for j in journals %}
+  <div class="card">
+    <p><strong>Fecha:</strong> {{ j.created_at|date:"d M Y, H:i" }}</p>
+    <p>{{ j.entry_text }}</p>
+  </div>
+{% empty %}
+  <p>No hay entradas aún. 🌙</p>
+{% endfor %}
+{% endblock %}
