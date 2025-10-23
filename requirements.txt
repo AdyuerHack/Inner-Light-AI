@@ -1,0 +1,44 @@
+# ==========================================================
+# Inner Light AI – Django + OpenAI Project Requirements
+# Author: Adyuer de Jesús Ojeda Badel
+# Date: 2025-10-23
+# Description:
+#   Core dependencies for the Inner-Light-AI web application,
+#   including Django backend, REST API, authentication, and
+#   OpenAI integration for emotional journaling and guidance.
+# ==========================================================
+
+# --- CORE FRAMEWORK ---
+Django>=5.0,<6.0
+djangorestframework>=3.15
+django-cors-headers>=4.0
+
+# --- DATABASE & ENVIRONMENT MANAGEMENT ---
+python-dotenv>=1.0
+psycopg2-binary>=2.9     # PostgreSQL adapter (optional)
+sqlite-utils>=3.36       # Utilidad para depurar la base de datos SQLite
+
+# --- AI & API INTEGRATION ---
+openai>=1.0.0
+requests>=2.31.0
+
+# --- FRONTEND & STATIC FILE MANAGEMENT ---
+whitenoise>=6.6.0        # Servir archivos estáticos en producción
+Pillow>=10.0.0            # Procesamiento de imágenes (ej. avatares, fondos)
+django-crispy-forms>=2.1  # Mejora visual de formularios HTML
+
+# --- AUTHENTICATION & SECURITY ---
+django-allauth>=0.63.3
+djangorestframework-simplejwt>=5.3.1
+cryptography>=42.0        # Seguridad para manejo de tokens o claves
+django-environ>=0.11.2    # Alternativa para variables de entorno
+
+# --- UTILITIES ---
+markdown>=3.5.2           # Para renderizar texto enriquecido en el diario
+django-filter>=24.1       # Para filtrar consultas en APIs
+gunicorn>=21.2.0          # Servidor WSGI para despliegue en producción
+
+# --- DEVELOPMENT & LINTING TOOLS ---
+black>=24.0.0             # Formateador automático de código
+isort>=5.13.0             # Ordenador de imports
+flake8>=7.0.0             # Linter para mantener código limpio
