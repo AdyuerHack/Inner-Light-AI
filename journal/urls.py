@@ -1,7 +1,9 @@
 from django.urls import path
 from . import views
 
+app_name = 'journal'
+
 urlpatterns = [
-    path('new/', views.journal_entry, name='journal_entry'),
-    path('list/', views.journal_list, name='journal_list'),
+    path('', views.journal_list, name='list'),
+    path('new/', views.journal_entry, name='entry'),
 ]

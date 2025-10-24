@@ -1,9 +1,12 @@
-{% extends 'journal/base_journal.html' %}
+{% extends "journal/base_journal.html" %}
 {% block content %}
-<h2>Nueva entrada del diario 🌿</h2>
-<form method="post">
-  {% csrf_token %}
-  {{ form.as_p }}
-  <button type="submit" class="btn">Guardar</button>
-</form>
+<div class="container mt-5 text-center">
+    <h2>💭 Nueva entrada</h2>
+    <form method="POST" class="mt-4">
+        {% csrf_token %}
+        <textarea name="content" rows="6" class="form-control mb-3" placeholder="Escribe tus pensamientos, sueños o ideas..." required></textarea>
+        <button type="submit" class="btn btn-success w-50">Guardar entrada</button>
+    </form>
+    <a href="{% url 'journal:list' %}" class="btn btn-link text-light mt-3">Volver al diario</a>
+</div>
 {% endblock %}

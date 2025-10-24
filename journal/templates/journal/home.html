@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inner Light AI 🌟</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #3a0ca3, #7209b7, #f72585);
+            color: white;
+            text-align: center;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .card {
+            background-color: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(8px);
+            border-radius: 20px;
+            padding: 2rem;
+            color: white;
+        }
+        .btn-custom {
+            background-color: #f72585;
+            border: none;
+        }
+        .btn-custom:hover {
+            background-color: #b5179e;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="mb-4">🌟 Inner Light AI</h1>
+        <p class="lead">Tu mentor espiritual y emocional 24/7</p>
+
+        {% if user.is_authenticated %}
+            <div class="card mx-auto mt-4" style="max-width: 400px;">
+                <h4>Hola, {{ user.username }} ✨</h4>
+                <p>Gracias por volver a conectar contigo.</p>
+                <a href="{% url 'logout' %}" class="btn btn-light mt-3">Cerrar sesión</a>
+            </div>
+        {% else %}
+            <div class="card mx-auto mt-4" style="max-width: 400px;">
+                {% if show_register %}
+                    <h4>Registrarse</h4>
+                    <form method="POST" action="{% url 'register' %}">
+                        {% csrf_token %}
+                        <input type="text" name="username" class="form-control my-2" placeholder="Usuario" required>
+                        <input type="password" name="password" class="form-control my-2" placeholder="Contraseña" required>
+                        <button type="submit" class="btn btn-custom w-100 mt-2">Registrarme</button>
+                    </form>
+                    <a href="{% url 'login' %}" class="text-light d-block mt-3">¿Ya tienes cuenta? Inicia sesión</a>
+                {% elif show_login %}
+                    <h4>Iniciar Sesión</h4>
+                    <form method="POST" action="{% url 'login' %}">
+                        {% csrf_token %}
+                        <input type="text" name="username" class="form-control my-2" placeholder="Usuario" required>
+                        <input type="password" name="password" class="form-control my-2" placeholder="Contraseña" required>
+                        <button type="submit" class="btn btn-custom w-100 mt-2">Entrar</button>
+                    </form>
+                    <a href="{% url 'register' %}" class="text-light d-block mt-3">¿No tienes cuenta? Regístrate</a>
+                {% else %}
+                    <p>Únete a nuestra comunidad para comenzar tu viaje interior ✨</p>
+                    <a href="{% url 'login' %}" class="btn btn-light mx-2">Iniciar sesión</a>
+                    <a href="{% url 'register' %}" class="btn btn-custom mx-2">Registrarme</a>
+                {% endif %}
+            </div>
+        {% endif %}
+
+        {% for message in messages %}
+            <div class="alert alert-info mt-3 w-50 mx-auto">{{ message }}</div>
+        {% endfor %}
+    </div>
+</body>
+</html>
