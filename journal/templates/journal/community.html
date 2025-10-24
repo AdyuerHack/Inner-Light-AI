@@ -1,7 +1,6 @@
 {% extends "journal/base_journal.html" %}
 {% block content %}
 <style>
-    /* 🔹 Reinicio visual general */
     body {
         background: linear-gradient(160deg, #336F97, #48C9B0, #FFB84D);
         color: #FFFFFF;
@@ -10,7 +9,6 @@
         overflow-x: hidden;
     }
 
-    /* Elimina cualquier navbar o recuadro de fondo del layout base */
     nav.navbar {
         display: none !important;
     }
@@ -70,16 +68,16 @@
         font-size: 0.9rem;
     }
 
-    /* === CONTENIDO PRINCIPAL === */
+    /* === CONTENIDO === */
     .content {
-        margin-left: 260px; /* 🔹 más pegado al sidebar */
+        margin-left: 260px;
         padding: 2rem 2rem 4rem;
         display: flex;
         flex-direction: column;
-        align-items: flex-start; /* 🔹 alinea todo hacia la izquierda */
+        align-items: flex-start;
     }
 
-    /* === CAJA DE PUBLICACIÓN === */
+    /* === FORMULARIO PRINCIPAL === */
     .header-card {
         background: linear-gradient(135deg, #48C9B0, #FFB84D, #FFD700);
         border-radius: 18px;
@@ -127,7 +125,6 @@
     /* === PUBLICACIONES === */
     .post-card {
         background: linear-gradient(180deg, #336F97, #48C9B0);
-        color: #FFFFFF;
         border-radius: 15px;
         padding: 1.3rem 1.5rem;
         margin-bottom: 1.5rem;
@@ -173,6 +170,43 @@
         color: #FFD700;
     }
 
+    /* === COMENTARIOS === */
+    .comment-section {
+        margin-top: 1rem;
+        padding-top: 0.8rem;
+        border-top: 1px solid rgba(255,255,255,0.2);
+    }
+
+    .comment {
+        background: rgba(255,255,255,0.1);
+        border-radius: 10px;
+        padding: 8px 12px;
+        margin: 6px 0;
+        color: #FFF;
+        font-size: 0.9rem;
+    }
+
+    .comment small {
+        color: #FFD700;
+        font-size: 0.8rem;
+    }
+
+    .comment-form textarea {
+        height: 40px;
+        font-size: 0.9rem;
+    }
+
+    .comment-form button {
+        margin-top: 5px;
+        background-color: #FFD700;
+        color: #2C3E50;
+        border-radius: 10px;
+        font-weight: bold;
+        padding: 5px 12px;
+        border: none;
+        cursor: pointer;
+    }
+
     .no-posts {
         text-align: center;
         font-size: 1.1rem;
@@ -181,7 +215,7 @@
     }
 </style>
 
-<!-- Sidebar -->
+<!-- SIDEBAR -->
 <div class="sidebar">
     <h2>🌟 Inner Light AI</h2>
     <nav>
@@ -194,20 +228,19 @@
     </div>
 </div>
 
-<!-- Contenido principal -->
+<!-- CONTENIDO PRINCIPAL -->
 <div class="content">
-    <!-- Caja de texto -->
+    <!-- Publicar pregunta/reflexión -->
     <div class="card header-card">
         <form method="POST" action="{% url 'journal:create_post' %}">
             {% csrf_token %}
-            <textarea name="content" rows="2" placeholder="💭 Comparte tu reflexión..." required></textarea>
-            <div class="d-flex justify-content-end mt-2">
+            <textarea name="content" rows="2" placeholder="💭 Comparte una pregunta o reflexión..." required></textarea>
+            <div style="text-align: right;">
                 <button type="submit" class="btn btn-publish">Publicar</button>
             </div>
         </form>
     </div>
 
-    <!-- Feed de publicaciones -->
     {% for post in posts %}
         <div class="post-card">
             <div class="post-header">
@@ -215,12 +248,33 @@
                 <span class="small text-light">{{ post.created_at|date:"d/m/Y H:i" }}</span>
             </div>
             <p class="mt-2 mb-3">{{ post.content }}</p>
+            
             <div class="reaction-bar">
                 <a href="{% url 'journal:react_to_post' post.id 'heart' %}">❤️ {{ post.heart_count }}</a>
                 <a href="{% url 'journal:react_to_post' post.id 'laugh' %}">😂 {{ post.laugh_count }}</a>
                 <a href="{% url 'journal:react_to_post' post.id 'pray' %}">🙏 {{ post.pray_count }}</a>
                 <a href="{% url 'journal:react_to_post' post.id 'sad' %}">😢 {{ post.sad_count }}</a>
-                <a href="{% url 'journal:react_to_post' post.id 'star' %}">🌟 {{ post.star_count }}</a>
+                <a href="{% url 'journal:react_to_post' post.id 'light' %}">🌟 {{ post.light_count }}</a>
+            </div>
+
+
+            <!-- Sección de comentarios -->
+            <div class="comment-section">
+                {% for comment in post.comments.all %}
+                    <div class="comment">
+                        <p>{{ comment.content }}</p>
+                        <small>💬 Usuario Anónimo — {{ comment.created_at|date:"d/m/Y H:i" }}</small>
+                    </div>
+                {% empty %}
+                    <p style="font-size: 0.9rem; color: #ddd;">Sé el primero en comentar 🌱</p>
+                {% endfor %}
+
+                <!-- Formulario para añadir comentario -->
+                <form method="POST" action="{% url 'journal:add_comment' post.id %}" class="comment-form">
+                    {% csrf_token %}
+                    <textarea name="content" placeholder="✍️ Escribe un comentario..." required></textarea>
+                    <button type="submit">Responder</button>
+                </form>
             </div>
         </div>
     {% empty %}

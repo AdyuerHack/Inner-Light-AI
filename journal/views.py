@@ -1,8 +1,9 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db.models import Count
-from .models import JournalEntry, CommunityPost, Reaction
+from .models import JournalEntry, CommunityPost, CommunityComment, Reaction
+
 
 
 @login_required
@@ -32,21 +33,16 @@ def journal_entry(request):
 
 
 # 🌐 Comunidad anónima (tipo Twitter)
-@login_required
 def community_feed(request):
-    """
-    Muestra el muro anónimo con las últimas 50 publicaciones
-    y los conteos de reacciones precalculados.
-    """
-    posts = CommunityPost.objects.all().order_by('-created_at')[:50]
+    posts = CommunityPost.objects.all().order_by('-created_at').prefetch_related('reactions', 'comments')
 
-    # Agregamos los conteos de reacciones manualmente
+    # Agregamos conteos de cada tipo de reacción
     for post in posts:
         post.heart_count = post.reactions.filter(reaction_type='heart').count()
         post.laugh_count = post.reactions.filter(reaction_type='laugh').count()
         post.pray_count = post.reactions.filter(reaction_type='pray').count()
         post.sad_count = post.reactions.filter(reaction_type='sad').count()
-        post.star_count = post.reactions.filter(reaction_type='star').count()
+        post.light_count = post.reactions.filter(reaction_type='light').count()
 
     return render(request, 'journal/community.html', {'posts': posts})
 
@@ -62,6 +58,15 @@ def create_post(request):
             messages.warning(request, 'Tu publicación está vacía.')
     return redirect('journal:community')
 
+@login_required
+def add_comment(request, post_id):
+    post = get_object_or_404(CommunityPost, id=post_id)
+    if request.method == 'POST':
+        content = request.POST.get('content')
+        if content:
+            CommunityComment.objects.create(post=post, user=request.user, content=content)
+        return redirect('journal:community')
+    return redirect('journal:community')
 
 @login_required
 def react_to_post(request, post_id, reaction_type):

@@ -15,7 +15,16 @@ class CommunityPost(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"Post anónimo {self.id}"
+        return self.content[:60]
+    
+class CommunityComment(models.Model):
+    post = models.ForeignKey(CommunityPost, on_delete=models.CASCADE, related_name='comments')
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    content = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Comentario en {self.post.id}"
 
 class Reaction(models.Model):
     REACTION_CHOICES = [
