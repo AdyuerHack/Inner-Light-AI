@@ -26,12 +26,14 @@
 </head>
 <body>
     <nav class="navbar navbar-dark bg-dark px-4">
-        <span class="navbar-brand">🌟 Inner Light AI</span>
-        <div>
-            <span class="me-3">{{ request.user.username }}</span>
-            <a href="{% url 'logout' %}" class="btn btn-sm btn-outline-light">Cerrar sesión</a>
-        </div>
-    </nav>
+    <span class="navbar-brand">🌟 Inner Light AI</span>
+    <div>
+        <a href="{% url 'journal:list' %}" class="btn btn-sm btn-outline-light me-2">Mi Diario</a>
+        <a href="{% url 'journal:community' %}" class="btn btn-sm btn-outline-info me-2">Comunidad</a>
+        <a href="{% url 'logout' %}" class="btn btn-sm btn-outline-light">Cerrar sesión</a>
+    </div>
+</nav>
+
 
     {% for message in messages %}
         <div class="alert alert-info text-center m-0">{{ message }}</div>

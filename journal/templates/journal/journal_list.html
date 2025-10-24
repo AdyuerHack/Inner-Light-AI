@@ -1,20 +1,176 @@
-{% extends "journal/base_journal.html" %}
-{% block content %}
-<div class="container mt-5 text-center">
-    <h2>🪶 Tu Diario Emocional</h2>
-    <a href="{% url 'journal:entry' %}" class="btn btn-light my-3">Nueva entrada</a>
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>🌿 Tu Diario Emocional | Inner Light AI</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(160deg, #336F97, #48C9B0, #FFB84D);
+            color: #FFFFFF;
+            display: flex;
+            height: 100vh;
+        }
 
-    {% if entries %}
+        /* --- SIDEBAR --- */
+        .sidebar {
+            width: 240px;
+            background: linear-gradient(180deg, #48C9B0, #336F97);
+            color: white;
+            padding: 1.5rem 1rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            border-top-right-radius: 20px;
+            border-bottom-right-radius: 20px;
+            box-shadow: 3px 0 10px rgba(0, 0, 0, 0.25);
+        }
+
+        .sidebar h2 {
+            font-size: 1.3rem;
+            color: #FFD700;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .sidebar a {
+            color: white;
+            text-decoration: none;
+            margin: 0.7rem 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1rem;
+        }
+
+        .sidebar a:hover {
+            color: #FFB84D;
+        }
+
+        .sidebar-footer {
+            font-size: 0.9rem;
+            color: #FFD700;
+            text-align: center;
+            margin-top: 2rem;
+        }
+
+        /* --- MAIN CONTENT --- */
+        .main {
+            flex-grow: 1;
+            padding: 2rem;
+            overflow-y: auto;
+            text-align: center;
+        }
+
+        h1 {
+            color: #FFD700;
+            font-size: 2rem;
+            text-shadow: 0 0 6px rgba(255, 215, 0, 0.6);
+        }
+
+        /* --- FORMULARIO EN LA MISMA VISTA --- */
+        form {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.05));
+            border-radius: 15px;
+            padding: 1rem;
+            margin: 2rem auto;
+            width: 80%;
+            max-width: 700px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        textarea {
+            width: 100%;
+            border: none;
+            border-radius: 12px;
+            padding: 15px;
+            font-size: 1rem;
+            color: #2C3E50;
+            font-family: 'Poppins', sans-serif;
+            resize: none;
+            height: 120px;
+        }
+
+        textarea:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px #FFD700;
+        }
+
+        button {
+            background-color: #FFD700;
+            color: #2C3E50;
+            border: none;
+            border-radius: 12px;
+            padding: 10px 20px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background-color: #FFB84D;
+            transform: scale(1.05);
+        }
+
+        /* --- ENTRADAS --- */
+        .entry {
+            background: linear-gradient(160deg, #48C9B0, #336F97);
+            border-radius: 15px;
+            padding: 1rem 1.5rem;
+            margin: 1rem auto;
+            max-width: 700px;
+            text-align: left;
+            color: #fff;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.25);
+        }
+
+        .entry-date {
+            text-align: right;
+            color: #FFD700;
+            font-size: 0.9rem;
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div>
+            <h2>🌟 Inner Light AI</h2>
+            <a href="{% url 'journal:list' %}">🪶 Mi Diario</a>
+            <a href="{% url 'journal:community' %}">🌐 Comunidad</a>
+            <a href="{% url 'logout' %}">🚪 Cerrar Sesión</a>
+        </div>
+        <div class="sidebar-footer">
+            Illuminate Your Inner Path ✨
+        </div>
+    </div>
+
+    <!-- Main -->
+    <div class="main">
+        <h1>🪶 Tu Diario Emocional</h1>
+
+        <!-- FORMULARIO INLINE -->
+        <form method="POST" action="{% url 'journal:add' %}">
+            {% csrf_token %}
+            <textarea name="content" placeholder="Escribe tus pensamientos, sueños o ideas..."></textarea>
+            <button type="submit">Guardar entrada</button>
+        </form>
+
+        <!-- ENTRADAS EXISTENTES -->
         {% for entry in entries %}
-            <div class="card mb-3 text-start mx-auto" style="max-width:600px;">
-                <div class="card-body">
-                    <p class="card-text">{{ entry.content }}</p>
-                    <p class="text-muted small text-end">{{ entry.created_at|date:"d/m/Y H:i" }}</p>
-                </div>
+            <div class="entry">
+                <p>{{ entry.content }}</p>
+                <p class="entry-date">{{ entry.created_at|date:"d/m/Y H:i" }}</p>
             </div>
+        {% empty %}
+            <p>No hay entradas todavía. 🌱</p>
         {% endfor %}
-    {% else %}
-        <p class="text-light mt-4">Aún no tienes pensamientos guardados 🌙</p>
-    {% endif %}
-</div>
-{% endblock %}
+    </div>
+
+</body>
+</html>

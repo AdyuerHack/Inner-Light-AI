@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.urls import path, include
-from . import views
+from inner_light_ai import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -10,3 +10,4 @@ urlpatterns = [
     path('logout/', views.user_logout, name='logout'),
     path('journal/', include('journal.urls')),
 ]
+
