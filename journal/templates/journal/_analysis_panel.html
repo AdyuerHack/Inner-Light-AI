@@ -1,0 +1,136 @@
+{# journal/templates/journal/_analysis_panel.html #}
+<div class="card">
+  <div class="row" style="align-items:center; justify-content:space-between;">
+    <h2 style="margin:0;">🧠 Análisis de patrones</h2>
+    <form method="post" action="{% url 'journal:analyze' %}">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-primary">Analizar patrones</button>
+    </form>
+  </div>
+
+  {% if analysis_warning %}
+    <div class="msg warning mt8">⚠️ {{ analysis_warning }}</div>
+  {% endif %}
+  {% if analysis_error %}
+    <div class="msg error mt8">❌ {{ analysis_error }}</div>
+  {% endif %}
+
+  {% if analysis_data %}
+    {% if last_analysis_dt %}
+      <div class="muted mt8">Último análisis: {{ last_analysis_dt|date:"Y-m-d H:i" }}</div>
+    {% endif %}
+
+    {% if analysis_data.emociones %}
+      <details class="mt16">
+        <summary><strong>Emociones</strong></summary>
+        <ul class="mt8">
+          {% for e in analysis_data.emociones %}
+            <li>
+              <strong>{{ e.nombre }}</strong>
+              <span class="muted">— frecuencia: {{ e.frecuencia }}</span>
+              {% if e.evidencia %}<div class="muted">“{{ e.evidencia }}”</div>{% endif %}
+            </li>
+          {% endfor %}
+        </ul>
+      </details>
+    {% endif %}
+
+    {% if analysis_data.disparadores %}
+      <details class="mt16">
+        <summary><strong>Disparadores</strong></summary>
+        <ul class="mt8">
+          {% for d in analysis_data.disparadores %}
+            <li>
+              <strong>{{ d.tipo }}</strong>
+              {% if d.ejemplos %}
+                <div class="muted">Ejemplos: {{ d.ejemplos|join:", " }}</div>
+              {% endif %}
+            </li>
+          {% endfor %}
+        </ul>
+      </details>
+    {% endif %}
+
+    {% if analysis_data.patrones %}
+      <details class="mt16">
+        <summary><strong>Patrones</strong></summary>
+        <ul class="mt8">
+          {% for p in analysis_data.patrones %}
+            <li>
+              <strong>{{ p.nombre }}</strong>
+              <div class="muted">{{ p.descripcion }}</div>
+              {% if p.frases_representativas %}
+                <ul class="mt8">
+                  {% for f in p.frases_representativas %}
+                    <li class="muted">“{{ f }}”</li>
+                  {% endfor %}
+                </ul>
+              {% endif %}
+            </li>
+          {% endfor %}
+        </ul>
+      </details>
+    {% endif %}
+
+    {% if analysis_data.necesidades %}
+      <details class="mt16">
+        <summary><strong>Necesidades</strong></summary>
+        <ul class="mt8">
+          {% for n in analysis_data.necesidades %}
+            <li>
+              <div><strong>{{ n.descripcion }}</strong></div>
+              {% if n.sugerencias %}
+                <ol class="mt8">
+                  {% for s in n.sugerencias %}<li>{{ s }}</li>{% endfor %}
+                </ol>
+              {% endif %}
+            </li>
+          {% endfor %}
+        </ul>
+      </details>
+    {% endif %}
+
+    {% if analysis_data.ciclos %}
+      <details class="mt16">
+        <summary><strong>Ciclos</strong></summary>
+        <ul class="mt8">
+          {% for c in analysis_data.ciclos %}
+            <li>
+              <div><strong>{{ c.descripcion }}</strong></div>
+              {% if c.secuencia %}
+                <div class="muted">Secuencia: {{ c.secuencia|join:" → " }}</div>
+              {% endif %}
+            </li>
+          {% endfor %}
+        </ul>
+      </details>
+    {% endif %}
+
+    {% if analysis_data.recomendaciones %}
+      <details class="mt16">
+        <summary><strong>Recomendaciones</strong></summary>
+        <div class="mt8">
+          {% for r in analysis_data.recomendaciones %}
+            <div class="card" style="margin-bottom:8px;">
+              <div>
+                <strong>{{ r.practica }}</strong>
+                {% if r.frecuencia %}<span class="muted"> ({{ r.frecuencia }})</span>{% endif %}
+              </div>
+              {% if r.pasos %}
+                <ol class="mt8">
+                  {% for s in r.pasos %}<li>{{ s }}</li>{% endfor %}
+                </ol>
+              {% endif %}
+            </div>
+          {% empty %}
+            <div class="muted">Sin recomendaciones en este momento.</div>
+          {% endfor %}
+        </div>
+      </details>
+    {% endif %}
+  {% else %}
+    <div class="muted mt8">
+      Aún no has generado un análisis. Escribe algunas entradas y pulsa “Analizar patrones”.
+    </div>
+  {% endif %}
+</div>

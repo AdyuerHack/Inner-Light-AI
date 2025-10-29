@@ -1,0 +1,42 @@
+{% load static %}
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{% block title %}Inner Light AI{% endblock %}</title>
+
+  <!-- Estilos globales -->
+  <link rel="stylesheet" href="{% static 'journal/app.css' %}">
+</head>
+<body class="bg-gradient">
+  <aside class="sidebar">
+    <div class="brand">
+      <span class="brand__icon">🌟</span>
+      <span class="brand__name">Inner Light AI</span>
+    </div>
+
+    <nav class="menu">
+      <a class="menu__item" href="{% url 'journal:list' %}">🪶 Mi Diario</a>
+      <a class="menu__item" href="{% url 'journal:community' %}">🌐 Comunidad</a>
+      <a class="menu__item" href="{% url 'logout' %}">📖 Cerrar<br>Sesión</a>
+    </nav>
+
+    <div class="footer-slogan">Illuminate Your Inner Path ✨</div>
+  </aside>
+
+  <main class="content">
+    {% if messages %}
+      <div class="flash">
+        {% for m in messages %}
+          <div class="alert {% if m.tags == 'error' %}alert--error{% elif m.tags == 'warning' %}alert--warn{% elif m.tags == 'success' %}alert--ok{% else %}alert--info{% endif %}">
+            {{ m }}
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>
