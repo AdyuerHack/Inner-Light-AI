@@ -70,18 +70,35 @@
             text-shadow: 0 0 6px rgba(255, 215, 0, 0.6);
         }
 
+        /* --- MENSAJES --- */
+        .messages {
+            width: 80%;
+            max-width: 700px;
+            margin: 0.5rem auto 0;
+            text-align: left;
+        }
+        .msg {
+            background: rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.25);
+            padding: .6rem .9rem;
+            border-radius: 10px;
+            margin-bottom: .5rem;
+        }
+
         /* --- FORMULARIO EN LA MISMA VISTA --- */
         form {
             background: linear-gradient(145deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.05));
             border-radius: 15px;
             padding: 1rem;
-            margin: 2rem auto;
+            margin: 2rem auto 1.2rem;
             width: 80%;
             max-width: 700px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            text-align: left;
         }
 
-        textarea {
+        textarea,
+        .form-control {
             width: 100%;
             border: none;
             border-radius: 12px;
@@ -89,11 +106,13 @@
             font-size: 1rem;
             color: #2C3E50;
             font-family: 'Poppins', sans-serif;
-            resize: none;
-            height: 120px;
+            resize: vertical;
+            min-height: 120px;
+            box-sizing: border-box;
+            background: #fff;
         }
 
-        textarea:focus {
+        textarea:focus, .form-control:focus {
             outline: none;
             box-shadow: 0 0 0 3px #FFD700;
         }
@@ -132,7 +151,6 @@
             color: #FFD700;
             font-size: 0.9rem;
         }
-
     </style>
 </head>
 <body>
@@ -154,17 +172,26 @@
     <div class="main">
         <h1>🪶 Tu Diario Emocional</h1>
 
-        <!-- FORMULARIO INLINE -->
-        <form method="POST" action="{% url 'journal:add' %}">
+        <!-- MENSAJES -->
+        {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+                <div class="msg">{{ message }}</div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- FORMULARIO INLINE (usa JournalEntryForm) -->
+        <form method="POST" action="{% url 'journal:list' %}">
             {% csrf_token %}
-            <textarea name="content" placeholder="Escribe tus pensamientos, sueños o ideas..."></textarea>
+            {{ form.content }}
             <button type="submit">Guardar entrada</button>
         </form>
 
         <!-- ENTRADAS EXISTENTES -->
         {% for entry in entries %}
             <div class="entry">
-                <p>{{ entry.content }}</p>
+                <p>{{ entry.content|linebreaks }}</p>
                 <p class="entry-date">{{ entry.created_at|date:"d/m/Y H:i" }}</p>
             </div>
         {% empty %}
