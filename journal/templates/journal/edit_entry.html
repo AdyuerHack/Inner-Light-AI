@@ -1,0 +1,104 @@
+{% extends "journal/base_journal.html" %}
+{% block content %}
+<style>
+  body {
+    background: radial-gradient(circle at top, #48C9B0 0, #336F97 40%, #102a43 100%);
+    color: #FFFFFF;
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    overflow-x: hidden;
+  }
+  nav.navbar { display: none !important; }
+
+  .sidebar {
+    position: fixed; top: 0; left: 0; width: 240px; height: 100vh;
+    background: linear-gradient(180deg, #48C9B0, #336F97);
+    display: flex; flex-direction: column; align-items: center;
+    padding: 2rem 1rem;
+    border-top-right-radius: 25px; border-bottom-right-radius: 25px;
+    box-shadow: 4px 0 15px rgba(0, 0, 0, 0.25);
+    z-index: 100;
+  }
+  .sidebar h2 {
+    color: #FFD700; font-weight: 700; font-size: 1.4rem;
+    margin-bottom: 2rem; text-align: center;
+    text-shadow: 0 0 8px rgba(255, 215, 0, 0.5);
+  }
+  .sidebar nav a {
+    display: block; color: #FFFFFF; text-decoration: none;
+    margin: 15px 0; padding: 10px 20px; width: 85%;
+    text-align: left; border-radius: 10px; font-weight: 500;
+    transition: all 0.3s ease;
+  }
+  .sidebar nav a:hover {
+    background-color: #FFB84D; color: #2C3E50;
+    transform: translateX(5px);
+    box-shadow: 0 0 8px rgba(255, 215, 0, 0.4);
+  }
+  .sidebar .footer {
+    margin-top: auto; text-align: center; color: #FFD700;
+    font-weight: 600; font-size: 0.9rem;
+  }
+
+  .content {
+    margin-left: 260px;
+    padding: 2rem 2rem 4rem;
+    display: flex; justify-content:center; align-items:flex-start;
+  }
+
+  .card {
+    background: linear-gradient(180deg, #224567, #2f8c96);
+    border-radius: 18px;
+    padding: 1.3rem 1.4rem;
+    width: 100%; max-width: 720px;
+    box-shadow: 0 3px 15px rgba(0,0,0,.35);
+  }
+
+  textarea.input {
+    border: none; border-radius: 12px; resize: vertical;
+    padding: 10px; width: 100%; min-height: 160px;
+    color: #2C3E50; font-size: .95rem;
+    background-color: rgba(255, 255, 255, 0.97);
+    box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.1);
+  }
+  textarea.input:focus { outline: none; box-shadow: 0 0 0 3px #FFD700; }
+
+  .row-end { display:flex; justify-content:flex-end; gap:.6rem; margin-top:.7rem; }
+
+  .btn {
+    border: none; border-radius: 12px; padding: .5rem .9rem;
+    font-weight: 700; cursor: pointer; font-size: .9rem;
+  }
+  .btn.primary { background: #4dabf7; color: #163047; }
+  .btn.ghost { background: transparent; color: #fff; border: 1px solid rgba(255,255,255,.35); }
+
+</style>
+
+<div class="sidebar">
+  <h2>🌟 Inner Light AI</h2>
+  <nav>
+    <a href="{% url 'journal:list' %}">🪶 Mi Diario</a>
+    <a href="{% url 'journal:community' %}">🌐 Comunidad</a>
+    <a href="{% url 'logout' %}">📖 Cerrar Sesión</a>
+  </nav>
+  <div class="footer">Illuminate Your Inner Path ✨</div>
+</div>
+
+<div class="content">
+  <div class="card">
+    <h2>✏️ Editar entrada del diario</h2>
+    <p style="font-size:.9rem; color:#d6e4f5; margin:.1rem 0 1rem;">
+      Ajusta el texto de tu reflexión. Los cambios se verán inmediatamente en tu hilo de conversación con Inner Light AI.
+    </p>
+
+    <form method="post" action="">
+      {% csrf_token %}
+      <textarea class="input" name="content">{{ entry.content }}</textarea>
+      <div class="row-end">
+        <a href="{% url 'journal:list' %}" class="btn ghost">Cancelar</a>
+        <button type="submit" class="btn primary">Guardar cambios</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

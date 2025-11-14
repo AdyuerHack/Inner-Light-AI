@@ -1,17 +1,28 @@
 from pathlib import Path
 import os
 
+# Cargar variables desde .env
+from dotenv import load_dotenv
+
 # =========================
 # Rutas base del proyecto
 # =========================
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Cargar el archivo .env ubicado en la raíz del proyecto
+load_dotenv(BASE_DIR / ".env")
+
 # =========================
 # Seguridad / Debug
 # =========================
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "dev-secret-key-CHANGE-ME")
-DEBUG = True  # Cambia a False en producción
-ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", "").split(",") if os.environ.get("DJANGO_ALLOWED_HOSTS") else []
+DEBUG = os.environ.get("DJANGO_DEBUG", "True").lower() == "true"
+
+allowed_hosts_env = os.environ.get("DJANGO_ALLOWED_HOSTS", "")
+if allowed_hosts_env:
+    ALLOWED_HOSTS = [h.strip() for h in allowed_hosts_env.split(",")]
+else:
+    ALLOWED_HOSTS = []
 
 # =========================
 # Apps instaladas
@@ -52,7 +63,7 @@ WSGI_APPLICATION = "inner_light_ai.wsgi.application"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [BASE_DIR / "templates"],  # tus plantillas globales
+        "DIRS": [BASE_DIR / "templates"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -60,7 +71,6 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
-                # Para poder usar MEDIA_URL en templates si lo necesitas
                 "django.template.context_processors.media",
             ],
         },
@@ -91,7 +101,6 @@ USE_TZ = True
 STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_DIRS = [
-    # Si tienes una carpeta de estáticos del proyecto (opcional):
     # BASE_DIR / "static",
 ]
 
@@ -107,23 +116,11 @@ LOGIN_URL = "/accounts/login/"
 LOGIN_REDIRECT_URL = "/accounts/profile/"
 
 # =========================
-# Email (dev por defecto)
-# =========================
-EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-EMAIL_HOST = os.environ.get("EMAIL_HOST", "localhost")
-EMAIL_PORT = int(os.environ.get("EMAIL_PORT", "25"))
-EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", "")
-EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "")
-EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", "False").lower() == "true"
-EMAIL_USE_SSL = os.environ.get("EMAIL_USE_SSL", "False").lower() == "true"
-DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "webmaster@localhost")
-
-# =========================
 # Mensajes (Flash)
 # =========================
 from django.contrib.messages import constants as messages
+
 MESSAGE_STORAGE = "django.contrib.messages.storage.fallback.FallbackStorage"
-# Puedes mapear niveles a clases CSS si lo deseas:
 MESSAGE_TAGS = {
     messages.DEBUG: "debug",
     messages.INFO: "info",
@@ -135,19 +132,13 @@ MESSAGE_TAGS = {
 # =========================
 # DeepSeek (IA) - Config
 # =========================
-# Usa variables de entorno en producción:
-# export DEEPSEEK_API_KEY="sk-...."
-# export DEEPSEEK_MODEL="deepseek-chat"
-# (puedes cambiar el modelo por el que tengas habilitado)
 DEEPSEEK_API_KEY = os.environ.get("DEEPSEEK_API_KEY", "")
 DEEPSEEK_MODEL = os.environ.get("DEEPSEEK_MODEL", "deepseek-chat")
 DEEPSEEK_BASE_URL = os.environ.get("DEEPSEEK_BASE_URL", "https://api.deepseek.com")
 
 # =========================
-# (Opcional) Compatibilidad previa con OpenAI
+# Compatibilidad previa con OpenAI (opcional)
 # =========================
-# Si tenías llaves previas de OpenAI en tu entorno, las dejamos definidas pero NO se usan
-# en el flujo actual; ahora todo llama a DeepSeek desde journal/views.py
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY", "")
 OPENAI_MODEL = os.environ.get("OPENAI_MODEL", "gpt-4o-mini")
 OPENAI_ORG = os.environ.get("OPENAI_ORG", "")
@@ -156,8 +147,7 @@ OPENAI_ORG = os.environ.get("OPENAI_ORG", "")
 # Seguridad adicional básica
 # =========================
 CSRF_TRUSTED_ORIGINS = [
-    # Ejemplo: "https://tu-dominio.com"
-    # Agrega aquí dominios de despliegue si usas HTTPS reverse proxy
+    # "https://tu-dominio.com",
 ]
 
 SECURE_CONTENT_TYPE_NOSNIFF = True

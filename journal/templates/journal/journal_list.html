@@ -1,45 +1,168 @@
 {% extends "journal/base_journal.html" %}
 {% block content %}
 <style>
-  body { background: linear-gradient(160deg, #336F97, #48C9B0, #FFB84D); color: #FFFFFF; font-family: 'Poppins', sans-serif; margin: 0; overflow-x: hidden; }
+  body {
+    background: radial-gradient(circle at top, #48C9B0 0, #336F97 40%, #102a43 100%);
+    color: #FFFFFF;
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    overflow-x: hidden;
+  }
   nav.navbar { display: none !important; }
 
-  .sidebar { position: fixed; top: 0; left: 0; width: 240px; height: 100vh; background: linear-gradient(180deg, #48C9B0, #336F97);
-      display: flex; flex-direction: column; align-items: center; padding: 2rem 1rem; border-top-right-radius: 25px; border-bottom-right-radius: 25px; box-shadow: 4px 0 15px rgba(0, 0, 0, 0.25); z-index: 100; }
-  .sidebar h2 { color: #FFD700; font-weight: 700; font-size: 1.4rem; margin-bottom: 2rem; text-align: center; text-shadow: 0 0 8px rgba(255, 215, 0, 0.5); }
-  .sidebar nav a { display: block; color: #FFFFFF; text-decoration: none; margin: 15px 0; padding: 10px 20px; width: 85%; text-align: left; border-radius: 10px; font-weight: 500; transition: all 0.3s ease; }
-  .sidebar nav a:hover { background-color: #FFB84D; color: #2C3E50; transform: translateX(5px); box-shadow: 0 0 8px rgba(255, 215, 0, 0.4); }
-  .sidebar .footer { margin-top: auto; text-align: center; color: #FFD700; font-weight: 600; font-size: 0.9rem; }
+  .sidebar {
+    position: fixed; top: 0; left: 0; width: 240px; height: 100vh;
+    background: linear-gradient(180deg, #48C9B0, #336F97);
+    display: flex; flex-direction: column; align-items: center;
+    padding: 2rem 1rem;
+    border-top-right-radius: 25px; border-bottom-right-radius: 25px;
+    box-shadow: 4px 0 15px rgba(0, 0, 0, 0.25);
+    z-index: 100;
+  }
+  .sidebar h2 {
+    color: #FFD700; font-weight: 700; font-size: 1.4rem;
+    margin-bottom: 2rem; text-align: center;
+    text-shadow: 0 0 8px rgba(255, 215, 0, 0.5);
+  }
+  .sidebar nav a {
+    display: block; color: #FFFFFF; text-decoration: none;
+    margin: 15px 0; padding: 10px 20px; width: 85%;
+    text-align: left; border-radius: 10px; font-weight: 500;
+    transition: all 0.3s ease;
+  }
+  .sidebar nav a:hover {
+    background-color: #FFB84D; color: #2C3E50;
+    transform: translateX(5px);
+    box-shadow: 0 0 8px rgba(255, 215, 0, 0.4);
+  }
+  .sidebar .footer {
+    margin-top: auto; text-align: center; color: #FFD700;
+    font-weight: 600; font-size: 0.9rem;
+  }
 
-  .content { margin-left: 260px; padding: 2rem 2rem 4rem; display: flex; flex-direction: column; align-items: flex-start; gap: 1.2rem; }
+  .content {
+    margin-left: 260px;
+    padding: 2rem 2rem 4rem;
+    display: flex; flex-direction: column; align-items: center; gap: 1rem;
+  }
 
-  .card { background: linear-gradient(180deg, #336F97, #48C9B0); border-radius: 15px; padding: 1.1rem 1.2rem; width: 90%; max-width: 840px; margin-left: 1rem; box-shadow: 0 3px 8px rgba(0,0,0,.3); }
-  .card.sun { background: linear-gradient(135deg, #48C9B0, #FFB84D, #FFD700); color: #1f2a35; }
-  .card h1, .card h2, .card h3 { margin: 0 0 .6rem 0; }
-  .muted { color: #e8f6ffcc; font-size: .95rem; }
+  .shell {
+    width: 100%; max-width: 900px;
+    display: flex; flex-direction: column;
+    gap: 0.8rem;
+  }
 
-  textarea.input { border: none; border-radius: 15px; resize: vertical; padding: 12px; width: 100%; color: #2C3E50; font-size: 1rem; background-color: rgba(255, 255, 255, 0.95); box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.1); }
-  textarea.input:focus { outline: none; box-shadow: 0 0 0 3px #FFD700; }
+  .card {
+    background: linear-gradient(180deg, #224567, #2f8c96);
+    border-radius: 18px;
+    padding: 1.1rem 1.2rem;
+    box-shadow: 0 3px 15px rgba(0,0,0,.35);
+  }
 
-  .row-end { display: flex; gap: .6rem; justify-content: flex-end; align-items: center; }
-  .btn { border: none; border-radius: 12px; padding: .5rem .9rem; font-weight: 700; cursor: pointer; }
-  .btn.primary { background: #4dabf7; color: #163047; }
-  .btn.ghost { background: transparent; color: #fff; border: 1px solid rgba(255,255,255,.35); }
-  .btn.sun { background: #FFD700; color:#2C3E50; box-shadow: 0 4px 8px rgba(0,0,0,.25); }
-  .btn.sun:hover { background:#FFB84D; }
-
-  .list { list-style: none; padding: 0; margin: 0; }
-  .item { padding: .7rem 0; border-bottom: 1px dashed rgba(255,255,255,.2); }
-  .item .meta { color: #ffeaa7; font-size: .92rem; margin-bottom: .25rem; }
-
-  .alert { background: rgba(255,255,255,.15); border: 1px solid rgba(255,255,255,.3); padding: .6rem .8rem; border-left: 4px solid; border-radius: 10px; }
+  .messages-box { width: 100%; }
+  .alert {
+    background: rgba(255,255,255,.15);
+    border: 1px solid rgba(255,255,255,.3);
+    padding: .6rem .8rem;
+    border-left: 4px solid;
+    border-radius: 10px;
+    margin-bottom: .45rem;
+  }
   .alert.error { border-left-color: #e55353; }
   .alert.warn  { border-left-color: #d8a657; }
-  .messages { width: 90%; max-width: 840px; margin-left: 1rem; }
 
-  /* grid de dos columnas en pantallas amplias */
-  .two-cols { display: grid; grid-template-columns: 1.2fr .8fr; gap: 1.2rem; width: 100%; }
-  @media (max-width: 980px) { .two-cols { grid-template-columns: 1fr; } }
+  /* Chat thread */
+  .chat-thread {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+  .chat-message {
+    display: flex;
+    gap: .6rem;
+  }
+  .chat-avatar {
+    width: 32px; height: 32px;
+    border-radius: 999px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: .8rem; font-weight: 700;
+  }
+  .chat-avatar.user { background: #4dabf7; color:#0b2840; }
+  .chat-avatar.ai   { background: #FFD700; color:#634300; }
+
+  .chat-bubble {
+    flex: 1;
+    padding: .55rem .75rem;
+    border-radius: 14px;
+    font-size: .93rem;
+    line-height: 1.45;
+    background: linear-gradient(135deg,#163a5b,#224567);
+    border: 1px solid rgba(255,255,255,.15);
+  }
+  .chat-bubble.ai {
+    background: linear-gradient(135deg,#12324a,#215b68);
+  }
+
+  .chat-meta {
+    display:flex; justify-content:space-between; align-items:center;
+    font-size: .78rem;
+    color: #9fb3c8;
+    margin-bottom: .15rem;
+  }
+
+  .entry-actions {
+    display:flex; gap:.4rem; font-size:.78rem;
+  }
+  .entry-actions a,
+  .entry-actions button {
+    background:none; border:none; padding:0;
+    color:#a5b9d6; cursor:pointer;
+  }
+  .entry-actions a:hover,
+  .entry-actions button:hover {
+    color:#FFD700;
+    text-decoration: underline;
+  }
+
+  .section-title {
+    font-weight: 600; margin-top: .3rem; margin-bottom: .1rem;
+  }
+  .section-list {
+    margin: .15rem 0 .3rem 1.1rem; padding-left: .4rem;
+  }
+  .section-list li { margin-bottom: .1rem; }
+
+  /* Input area */
+  .input-card {
+    background: rgba(10, 26, 48, 0.9);
+    border-radius: 18px;
+    padding: .9rem 1rem;
+    box-shadow: 0 3px 15px rgba(0,0,0,.4);
+  }
+  textarea.input {
+    border: none; border-radius: 12px; resize: vertical;
+    padding: 10px; width: 100%; color: #2C3E50; font-size: .95rem;
+    background-color: rgba(255, 255, 255, 0.97);
+    box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.1);
+  }
+  textarea.input:focus { outline: none; box-shadow: 0 0 0 3px #FFD700; }
+
+  .input-actions {
+    display: flex; justify-content: space-between; align-items: center;
+    gap: .6rem; margin-top: .5rem;
+  }
+  .input-hint {
+    font-size: .8rem; color: #cbd6e3;
+  }
+
+  .btn {
+    border: none; border-radius: 12px; padding: .5rem .9rem;
+    font-weight: 700; cursor: pointer; font-size: .9rem;
+  }
+  .btn.primary { background: #4dabf7; color: #163047; }
+  .btn.secondary { background: #FFD700; color:#2C3E50; }
+  .btn.ghost { background: transparent; color: #fff; border: 1px solid rgba(255,255,255,.35); }
+
 </style>
 
 <div class="sidebar">
@@ -53,131 +176,166 @@
 </div>
 
 <div class="content">
-  {% if messages %}
-    <div class="messages">
-      {% for message in messages %}
-        <div class="alert {% if message.tags == 'error' %}error{% elif message.tags == 'warning' %}warn{% endif %}">{{ message }}</div>
-      {% endfor %}
-    </div>
-  {% endif %}
-
-  <div class="two-cols">
-    <!-- Columna izquierda: escribir y listar -->
-    <div class="left">
-      <div class="card sun">
-        <h1>📝 Tu diario</h1>
-        <form method="post" action="">
-          {% csrf_token %}
-          <textarea class="input" name="content" rows="6" placeholder="¿Qué estás pensando ahora?"></textarea>
-          <div class="row-end" style="margin-top:.6rem">
-            <a class="btn ghost" href="{% url 'journal:community' %}">Ir a Comunidad</a>
-            <button class="btn primary" type="submit">Guardar</button>
+  <div class="shell">
+    {% if messages %}
+      <div class="messages-box">
+        {% for message in messages %}
+          <div class="alert {% if message.tags == 'error' %}error{% elif message.tags == 'warning' %}warn{% endif %}">
+            {{ message }}
           </div>
-        </form>
+        {% endfor %}
       </div>
+    {% endif %}
 
-      <div class="card">
-        <h2>Tus entradas</h2>
-        {% if entries %}
-          <ul class="list">
-            {% for e in entries %}
-              <li class="item">
-                <div class="meta">{{ e.created_at|date:"Y-m-d H:i" }}</div>
-                <div class="text">{{ e.content }}</div>
-              </li>
-            {% endfor %}
-          </ul>
-        {% else %}
-          <p class="muted">Aún no has escrito nada. Empieza con una frase corta.</p>
-        {% endif %}
-      </div>
-    </div>
-
-    <!-- Columna derecha: análisis IA -->
-    <div class="right">
-      <div class="card sun">
-        <div class="row-end">
-          <a class="btn sun" href="{% url 'journal:analyze' %}">Analizar</a>
+    <div class="card">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:.5rem;">
+        <div>
+          <h2 style="margin:0;">🧠 Inner Light Journal</h2>
+          <p style="margin:.15rem 0 0; font-size:.85rem; color:#cddff5;">
+            Escribe libremente. Cuando quieras, pulsa <strong>“Analizar todo”</strong> para que la IA lea tu diario completo.
+          </p>
         </div>
+        <div style="text-align:right;">
+          <a class="btn secondary" href="{% url 'journal:analyze' %}">Analizar todo</a>
+          {% if last_analysis_dt %}
+            <div style="font-size:.75rem; color:#cddff5; margin-top:.15rem;">
+              Último análisis: {{ last_analysis_dt|date:"Y-m-d H:i" }}
+            </div>
+          {% endif %}
+        </div>
+      </div>
 
-        {% if analysis_error %}
-          <div class="alert error" style="margin:.6rem 0">Análisis generado con errores: {{ analysis_error }}</div>
-        {% elif analysis_warning %}
-          <div class="alert warn" style="margin:.6rem 0">{{ analysis_warning }}</div>
-        {% endif %}
-
-        {% if last_analysis_dt %}
-          <div class="muted">Último análisis: {{ last_analysis_dt|date:"Y-m-d H:i" }}</div>
-        {% endif %}
-
-        {% if analysis_data %}
-          {% with d=analysis_data %}
-            {% if d.emociones %}
-              <h3 style="margin-top:.6rem">Emociones</h3>
-              <ul class="list">
-                {% for emo in d.emociones %}
-                  <li class="item" style="border:0; padding:.3rem 0">
-                    <strong>{{ emo.nombre }}</strong> · {{ emo.frecuencia }}{% if emo.evidencia %} — <span class="muted">{{ emo.evidencia }}</span>{% endif %}
-                  </li>
-                {% endfor %}
-              </ul>
-            {% endif %}
-
-            {% if d.disparadores %}
-              <h3 style="margin-top:.6rem">Disparadores</h3>
-              <ul class="list">
-                {% for tr in d.disparadores %}
-                  <li class="item" style="border:0; padding:.3rem 0">
-                    {{ tr.tipo }}{% if tr.ejemplos %} — <span class="muted">{{ tr.ejemplos|join:", " }}</span>{% endif %}
-                  </li>
-                {% endfor %}
-              </ul>
-            {% endif %}
-
-            {% if d.patrones %}
-              <h3 style="margin-top:.6rem">Patrones</h3>
-              <ul class="list">
-                {% for p in d.patrones %}
-                  <li class="item" style="border:0; padding:.3rem 0">
-                    <b>{{ p.nombre }}</b> — {{ p.descripcion }}
-                    {% if p.frases_representativas %}
-                      <div class="muted">“{{ p.frases_representativas|join:"” · “" }}”</div>
-                    {% endif %}
-                  </li>
-                {% endfor %}
-              </ul>
-            {% endif %}
-
-            {% if d.necesidades %}
-              <h3 style="margin-top:.6rem">Necesidades</h3>
-              <ul class="list">
-                {% for n in d.necesidades %}
-                  <li class="item" style="border:0; padding:.3rem 0">{{ n.descripcion }}</li>
-                {% endfor %}
-              </ul>
-            {% endif %}
-
-            {% if d.recomendaciones %}
-              <h3 style="margin-top:.6rem">Recomendaciones</h3>
-              <ul class="list">
-                {% for r in d.recomendaciones %}
-                  <li class="item" style="border:0; padding:.4rem 0">
-                    <b>{{ r.practica }}</b> · {{ r.frecuencia }}
-                    {% if r.pasos %}
-                      <ol style="margin:.3rem 0 0 1.1rem">
-                        {% for s in r.pasos %}<li>{{ s }}</li>{% endfor %}
-                      </ol>
-                    {% endif %}
-                  </li>
-                {% endfor %}
-              </ul>
-            {% endif %}
-          {% endwith %}
+      <div class="chat-thread">
+        {# 1) Entradas del usuario como mensajes #}
+        {% if entries %}
+          {% for e in entries %}
+            <div class="chat-message">
+              <div class="chat-avatar user">Tú</div>
+              <div class="chat-bubble">
+                <div class="chat-meta">
+                  <span>{{ e.created_at|date:"Y-m-d H:i" }}</span>
+                  <span class="entry-actions">
+                    <a href="{% url 'journal:entry_edit' e.id %}">Editar</a>
+                    <form method="post" action="{% url 'journal:entry_delete' e.id %}" style="display:inline;" onsubmit="return confirm('¿Seguro que quieres eliminar esta entrada?');">
+                      {% csrf_token %}
+                      <button type="submit">Eliminar</button>
+                    </form>
+                  </span>
+                </div>
+                <div>{{ e.content }}</div>
+              </div>
+            </div>
+          {% endfor %}
         {% else %}
-          <p class="muted" style="margin-top:.6rem">Aún no has generado un análisis. Escribe algunas entradas y pulsa “Analizar”.</p>
+          <div class="chat-message">
+            <div class="chat-avatar user">Tú</div>
+            <div class="chat-bubble">
+              <div class="chat-meta">Sin mensajes aún</div>
+              <div>Empieza escribiendo cómo te sientes hoy. Luego podrás pedirle a Inner Light AI que analice todo tu proceso.</div>
+            </div>
+          </div>
+        {% endif %}
+
+        {# 2) Respuesta de la IA (último análisis) #}
+        {% if analysis_error %}
+          <div class="chat-message">
+            <div class="chat-avatar ai">IL</div>
+            <div class="chat-bubble ai">
+              <div class="section-title">Error en el análisis</div>
+              <p>{{ analysis_error }}</p>
+            </div>
+          </div>
+        {% elif analysis_data %}
+          <div class="chat-message">
+            <div class="chat-avatar ai">IL</div>
+            <div class="chat-bubble ai">
+              <div class="chat-meta">
+                <span>Análisis espiritual generado</span>
+                {% if last_analysis_dt %}
+                  <span>{{ last_analysis_dt|date:"Y-m-d H:i" }}</span>
+                {% endif %}
+              </div>
+
+              {% if analysis_data.estado_emocional_central %}
+                <div class="section-title">Estado emocional central</div>
+                <p>{{ analysis_data.estado_emocional_central }}</p>
+              {% endif %}
+
+              {% if analysis_data.patrones_pensamiento %}
+                <div class="section-title">Patrones de pensamiento predominantes</div>
+                <ul class="section-list">
+                  {% for p in analysis_data.patrones_pensamiento %}
+                    <li>{{ p }}</li>
+                  {% endfor %}
+                </ul>
+              {% endif %}
+
+              {% if analysis_data.creencias_limitantes %}
+                <div class="section-title">Creencias limitantes</div>
+                <ul class="section-list">
+                  {% for c in analysis_data.creencias_limitantes %}
+                    <li>{{ c }}</li>
+                  {% endfor %}
+                </ul>
+              {% endif %}
+
+              {% if analysis_data.herida_emocional_raiz %}
+                <div class="section-title">Herida emocional raíz</div>
+                <p>{{ analysis_data.herida_emocional_raiz }}</p>
+              {% endif %}
+
+              {% if analysis_data.interpretacion_espiritual %}
+                <div class="section-title">Interpretación espiritual</div>
+                <p>{{ analysis_data.interpretacion_espiritual|linebreaks }}</p>
+              {% endif %}
+
+              {% if analysis_data.consejo_practico %}
+                <div class="section-title">Consejo práctico</div>
+                <p>{{ analysis_data.consejo_practico|linebreaks }}</p>
+              {% endif %}
+
+              {% if analysis_data.consejo_espiritual %}
+                <div class="section-title">Consejo espiritual</div>
+                <p>{{ analysis_data.consejo_espiritual|linebreaks }}</p>
+              {% endif %}
+
+              {% if analysis_data.meditacion_guiada %}
+                <div class="section-title">Meditación guiada</div>
+                <p>{{ analysis_data.meditacion_guiada|linebreaks }}</p>
+              {% endif %}
+
+              {% if analysis_data.raw_text %}
+                <div class="section-title">Respuesta bruta de la IA (debug)</div>
+                <pre style="font-size:.78rem; white-space:pre-wrap;">{{ analysis_data.raw_text }}</pre>
+              {% endif %}
+
+              {% if analysis_warning %}
+                <div class="section-title">Nota</div>
+                <p>{{ analysis_warning }}</p>
+              {% endif %}
+            </div>
+          </div>
         {% endif %}
       </div>
     </div>
+
+    <div class="input-card">
+      <form method="post" action="">
+        {% csrf_token %}
+        <textarea class="input" name="content" rows="3" placeholder="Escribe aquí tu siguiente reflexión, sueño o pensamiento..."></textarea>
+        <div class="input-actions">
+          <div class="input-hint">
+            Inner Light AI te leerá mejor mientras más honesto seas contigo mismo.  
+            Primero guarda tus mensajes, luego pulsa “Analizar todo”.
+          </div>
+          <div style="display:flex; gap:.5rem;">
+            <a class="btn ghost" href="{% url 'journal:community' %}">Ir a Comunidad</a>
+            <button class="btn primary" type="submit">Guardar mensaje</button>
+          </div>
+        </div>
+      </form>
+    </div>
+
   </div>
 </div>
 {% endblock %}

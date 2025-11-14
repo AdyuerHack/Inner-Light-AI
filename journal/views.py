@@ -2,38 +2,39 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.conf import settings
-from django.utils import timezone
 import json
 import requests
 
 from .models import (
     JournalEntry, CommunityPost, CommunityComment, Reaction, JournalAnalysis
 )
-from .forms import CommunityPostForm  # ⬅️ necesario para el textbox en Comunidad
+from .forms import CommunityPostForm
 
 
-# ------------------ Diario ------------------
+# ------------------------------------------------------
+#                       DIARIO
+# ------------------------------------------------------
 
 @login_required
 def journal_list(request):
     """
-    Lista de entradas del diario + creación inline (sin forms) + muestra
-    el último análisis almacenado en JournalAnalysis, limpiando las claves
-    privadas (_warning/_error) para el template.
+    Pantalla principal del diario en formato tipo chat:
+    - Muestra las entradas del usuario como si fueran mensajes.
+    - Muestra el último análisis espiritual como respuesta de la IA.
     """
-    entries = JournalEntry.objects.filter(user=request.user).order_by('-created_at')
+    entries = JournalEntry.objects.filter(user=request.user).order_by('created_at')
 
-    # Crear nueva entrada simple (como lo usabas)
+    # Crear nueva entrada (mensaje del usuario)
     if request.method == 'POST':
         content = (request.POST.get('content') or '').strip()
         if content:
             JournalEntry.objects.create(user=request.user, content=content)
-            messages.success(request, '✨ Tu pensamiento fue guardado.')
+            messages.success(request, '✨ Tu pensamiento fue guardado en el hilo.')
             return redirect('journal:list')
         else:
-            messages.warning(request, 'Tu entrada está vacía.')
+            messages.warning(request, 'Tu mensaje está vacío.')
 
-    # Cargar último análisis y preparar variables seguras para el template
+    # Cargar último análisis
     last_analysis_obj = JournalAnalysis.objects.filter(user=request.user).first()
     analysis_data = None
     analysis_warning = None
@@ -64,13 +65,13 @@ def journal_list(request):
 @login_required
 def analyze_patterns(request):
     """
-    Recolecta entradas del usuario, llama a DeepSeek y guarda un resumen estructurado
-    en JournalAnalysis.result_json. Devuelve a la lista con mensajes.
+    Recolecta TODAS las entradas del usuario, llama a DeepSeek con el prompt espiritual
+    y guarda el resultado estructurado en JSON (último análisis).
     """
-    # 1) Validaciones básicas
     api_key = getattr(settings, 'DEEPSEEK_API_KEY', None)
     model = getattr(settings, 'DEEPSEEK_MODEL', 'deepseek-chat')
     base_url = getattr(settings, 'DEEPSEEK_BASE_URL', 'https://api.deepseek.com')
+
     if not api_key:
         messages.error(request, "Falta configurar la clave de DeepSeek (DEEPSEEK_API_KEY).")
         return redirect('journal:list')
@@ -81,8 +82,8 @@ def analyze_patterns(request):
         .order_by('created_at')
         .values('created_at', 'content')
     )
+
     if not entries:
-        # Guardamos un análisis vacío con warning para que el template lo muestre
         JournalAnalysis.objects.create(
             user=request.user,
             result_json=json.dumps({"_warning": "No hay entradas suficientes para analizar."})
@@ -90,43 +91,63 @@ def analyze_patterns(request):
         messages.warning(request, "No hay entradas para analizar todavía.")
         return redirect('journal:list')
 
-    # 2) Construir prompt (en español, orientado a salida JSON)
     joined_text = "\n\n".join(
         [f"[{e['created_at']:%Y-%m-%d %H:%M}] {e['content']}" for e in entries]
     )
+
     system = (
-        "Eres un analista de bienestar que identifica patrones emocionales y cognitivos "
-        "en diarios personales. Responde SOLO en JSON válido UTF-8, sin texto adicional. "
-        "La palabra 'json' está presente para activar el modo JSON. json"
+        "Eres INNER-LIGHT-AI, un mentor y coach espiritual experto en "
+        "biocodificación, psicoanálisis, Un Curso de Milagros y simbología mental-espiritual. "
+        "Debes responder SOLO en JSON válido UTF-8, sin texto adicional fuera del JSON. "
+        "El JSON final debe tener exactamente estas claves:\n\n"
+        "{\n"
+        '  "estado_emocional_central": "string",\n'
+        '  "patrones_pensamiento": ["lista", "de", "strings"],\n'
+        '  "creencias_limitantes": ["lista", "de", "strings"],\n'
+        '  "herida_emocional_raiz": "string",\n'
+        '  "interpretacion_espiritual": "string",\n'
+        '  "consejo_practico": "string",\n'
+        '  "consejo_espiritual": "string",\n'
+        '  "meditacion_guiada": "string"\n'
+        "}\n\n"
+        "Si hay poca información, rellena con strings cortos o listas vacías, "
+        "pero respeta siempre la estructura."
     )
+
     user_prompt = f"""
-Analiza el siguiente diario (entradas cronológicas). Entrega un JSON con estas claves:
+Lee las siguientes entradas del diario del usuario y realiza un análisis profundo
+desde la biocodificación, el psicoanálisis, Un Curso de Milagros y la simbología espiritual.
 
-- emociones: lista de objetos {{ "nombre": str, "frecuencia": "alta|media|baja", "evidencia": str? }}
-- disparadores: lista de objetos {{ "tipo": str, "ejemplos": [str]? }}
-- patrones: lista de objetos {{ "nombre": str, "descripcion": str, "frases_representativas": [str]? }}
-- necesidades: lista de objetos {{ "descripcion": str, "sugerencias": [str]? }}
-- ciclos: lista de objetos {{ "descripcion": str, "secuencia": [str]? }}
-- recomendaciones: lista de objetos {{ "practica": str, "frecuencia": str, "pasos": [str]? }}
+Tu misión:
+- Detectar la emoción central.
+- Identificar patrones de pensamiento.
+- Revelar creencias limitantes.
+- Conectar con la herida emocional raíz.
+- Dar una interpretación espiritual amorosa.
+- Ofrecer un consejo práctico y uno espiritual.
+- Crear una mini meditación guiada (6–10 líneas) en segunda persona,
+  que lo lleve de la confusión a la paz y reconexión con la abundancia interior.
 
-Si hay pocos datos, usa listas vacías y agrega sugerencias prudentes.
-Diario:
+Recuerda: la salida DEBE cumplir exactamente con las claves JSON indicadas.
+
+Diario del usuario:
 {joined_text}
 """.strip()
 
-    # 3) Llamar a DeepSeek (OpenAI-compatible /v1/chat/completions)
     url = f"{base_url.rstrip('/')}/v1/chat/completions"
-    headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json",
+    }
     payload = {
-        "model": model,  # p.ej. "deepseek-chat"
+        "model": model,
         "messages": [
             {"role": "system", "content": system},
             {"role": "user", "content": user_prompt}
         ],
-        # JSON Output de DeepSeek
         "response_format": {"type": "json_object"},
         "temperature": 0.2,
-        "max_tokens": 1200,
+        "max_tokens": 1500,
     }
 
     warning = None
@@ -135,8 +156,9 @@ Diario:
 
     try:
         resp = requests.post(url, headers=headers, json=payload, timeout=60)
+
         if resp.status_code != 200:
-            error = f"DeepSeek devolvió {resp.status_code}: {resp.text[:200]}"
+            error = f"DeepSeek devolvió {resp.status_code}: {resp.text[:300]}"
         else:
             data = resp.json()
             content = (
@@ -144,16 +166,22 @@ Diario:
                 .get("message", {})
                 .get("content", "")
             )
-            try:
-                result_payload = json.loads(content) if content else {}
-            except Exception:
-                error = "La respuesta de DeepSeek no fue un JSON válido."
+
+            if not content:
+                warning = "La IA no devolvió contenido."
+                result_payload = {}
+            else:
+                try:
+                    result_payload = json.loads(content)
+                except Exception:
+                    error = "La IA devolvió texto que no es JSON válido. Guardado como 'raw_text'."
+                    result_payload = {"raw_text": content}
+
     except requests.Timeout:
         error = "Timeout al contactar DeepSeek."
     except Exception as ex:
         error = f"Error al contactar DeepSeek: {ex}"
 
-    # 4) Guardar resultado estructurado
     if warning:
         result_payload["_warning"] = warning
     if error:
@@ -164,16 +192,57 @@ Diario:
         result_json=json.dumps(result_payload, ensure_ascii=False)
     )
 
-    # 5) Mensajes al usuario
     if error:
         messages.error(request, f"Análisis generado con errores: {error}")
+    elif warning:
+        messages.warning(request, warning)
     else:
-        messages.success(request, "🧠 Análisis de patrones generado correctamente con DeepSeek.")
+        messages.success(request, "✨ Análisis espiritual generado correctamente.")
 
     return redirect('journal:list')
 
 
-# ------------------ Comunidad ------------------
+@login_required
+def edit_entry(request, entry_id):
+    """
+    Permite editar el contenido de una entrada del diario del usuario.
+    """
+    entry = get_object_or_404(JournalEntry, id=entry_id, user=request.user)
+
+    if request.method == 'POST':
+        content = (request.POST.get('content') or '').strip()
+        if not content:
+            messages.warning(request, "El contenido no puede estar vacío.")
+            return redirect('journal:entry_edit', entry_id=entry.id)
+
+        entry.content = content
+        entry.save()
+        messages.success(request, "✏️ Entrada actualizada correctamente.")
+        return redirect('journal:list')
+
+    return render(request, 'journal/edit_entry.html', {"entry": entry})
+
+
+@login_required
+def delete_entry(request, entry_id):
+    """
+    Elimina una entrada del diario del usuario.
+    Solo acepta POST (enviado desde un pequeño formulario con CSRF).
+    """
+    entry = get_object_or_404(JournalEntry, id=entry_id, user=request.user)
+
+    if request.method == 'POST':
+        entry.delete()
+        messages.success(request, "🗑️ Entrada eliminada.")
+    else:
+        messages.error(request, "Método no permitido para eliminar la entrada.")
+
+    return redirect('journal:list')
+
+
+# ------------------------------------------------------
+#                       COMUNIDAD
+# ------------------------------------------------------
 
 @login_required
 def community_feed(request):
@@ -190,7 +259,6 @@ def community_feed(request):
         post.sad_count = post.reactions.filter(reaction_type='sad').count()
         post.light_count = post.reactions.filter(reaction_type='light').count()
 
-    # ⬇️ Enviar el formulario para que el textarea aparezca
     post_form = CommunityPostForm()
     return render(request, 'journal/community.html', {
         'posts': posts,
@@ -201,12 +269,10 @@ def community_feed(request):
 @login_required
 def create_post(request):
     if request.method == 'POST':
-        # Usa el form para mantener validaciones (tamaño/formatos) y los IDs usados por la UI
         form = CommunityPostForm(request.POST, request.FILES)
         if form.is_valid():
             obj = form.save(commit=False)
             obj.user = request.user
-            # Evitar posts completamente vacíos
             if not obj.content and not obj.image and not obj.video:
                 messages.warning(request, 'Tu publicación necesita texto, imagen o video.')
                 return redirect('journal:community')
@@ -214,7 +280,6 @@ def create_post(request):
             messages.success(request, '🌿 Tu reflexión fue publicada anónimamente.')
             return redirect('journal:community')
         else:
-            # Si hay errores, re-render con errores visibles y posts
             posts = (
                 CommunityPost.objects
                 .all()
@@ -227,6 +292,7 @@ def create_post(request):
                 post.pray_count = post.reactions.filter(reaction_type='pray').count()
                 post.sad_count = post.reactions.filter(reaction_type='sad').count()
                 post.light_count = post.reactions.filter(reaction_type='light').count()
+
             return render(request, 'journal/community.html', {
                 'posts': posts,
                 'post_form': form,
@@ -255,5 +321,5 @@ def react_to_post(request, post_id, reaction_type):
         post=post, user=request.user, reaction_type=reaction_type
     )
     if not created:
-        reaction.delete()  # toggle off
+        reaction.delete()
     return redirect('journal:community')
