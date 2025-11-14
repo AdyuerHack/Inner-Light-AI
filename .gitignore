@@ -1,4 +1,49 @@
+# =========================
+# Archivos de entorno / secretos
+# =========================
 .env
 *.env
+#!.env.example
+
+# =========================
+# Python / Django
+# =========================
 __pycache__/
-*.pyc
+*.py[cod]
+*$py.class
+
+# Logs
+*.log
+
+# Migraciones compiladas
+*/migrations/__pycache__/
+
+# =========================
+# Entornos virtuales
+# =========================
+venv/
+.envv/
+.envs/
+.python-version
+
+# =========================
+# Archivos estáticos / media generados
+# =========================
+staticfiles/
+static/
+media/
+
+# =========================
+# Herramientas de desarrollo
+# =========================
+.vscode/
+.idea/
+*.code-workspace
+
+# =========================
+# Otros temporales
+# =========================
+*.swp
+*.swo
+.DS_Store
+Thumbs.db

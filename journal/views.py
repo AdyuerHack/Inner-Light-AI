@@ -26,6 +26,8 @@ def journal_list(request):
 
     # Crear nueva entrada (mensaje del usuario)
     if request.method == 'POST':
+        # Este POST es solo para crear NUEVAS entradas.
+        # El borrado múltiple va a otra vista (bulk_delete_entries).
         content = (request.POST.get('content') or '').strip()
         if content:
             JournalEntry.objects.create(user=request.user, content=content)
@@ -224,19 +226,25 @@ def edit_entry(request, entry_id):
 
 
 @login_required
-def delete_entry(request, entry_id):
+def bulk_delete_entries(request):
     """
-    Elimina una entrada del diario del usuario.
-    Solo acepta POST (enviado desde un pequeño formulario con CSRF).
+    Elimina múltiples entradas del diario del usuario seleccionadas por checkbox.
     """
-    entry = get_object_or_404(JournalEntry, id=entry_id, user=request.user)
+    if request.method != 'POST':
+        messages.error(request, "Método no permitido para eliminar entradas.")
+        return redirect('journal:list')
 
-    if request.method == 'POST':
-        entry.delete()
-        messages.success(request, "🗑️ Entrada eliminada.")
-    else:
-        messages.error(request, "Método no permitido para eliminar la entrada.")
+    ids = request.POST.getlist('selected_entries')
+    if not ids:
+        messages.warning(request, "No seleccionaste ninguna entrada para eliminar.")
+        return redirect('journal:list')
 
+    # Asegura que solo se borran las del usuario autenticado
+    qs = JournalEntry.objects.filter(user=request.user, id__in=ids)
+    count = qs.count()
+    qs.delete()
+
+    messages.success(request, f"🗑️ Se eliminaron {count} entrada(s) del diario.")
     return redirect('journal:list')
 
 

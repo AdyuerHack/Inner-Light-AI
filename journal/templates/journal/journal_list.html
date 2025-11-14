@@ -79,7 +79,8 @@
   }
   .chat-message {
     display: flex;
-    gap: .6rem;
+    gap: .5rem;
+    align-items:flex-start;
   }
   .chat-avatar {
     width: 32px; height: 32px;
@@ -110,18 +111,42 @@
     margin-bottom: .15rem;
   }
 
-  .entry-actions {
-    display:flex; gap:.4rem; font-size:.78rem;
+  .entry-tools {
+    display:flex; gap:.5rem; align-items:center;
+    font-size:.78rem;
   }
-  .entry-actions a,
-  .entry-actions button {
-    background:none; border:none; padding:0;
-    color:#a5b9d6; cursor:pointer;
+  .entry-tools a {
+    color:#a5b9d6;
+    text-decoration:none;
   }
-  .entry-actions a:hover,
-  .entry-actions button:hover {
+  .entry-tools a:hover {
     color:#FFD700;
-    text-decoration: underline;
+    text-decoration:underline;
+  }
+
+  .entry-checkbox {
+    margin-top:.4rem;
+  }
+
+  .bulk-toolbar {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:.6rem;
+    font-size:.84rem;
+    color:#d6e4f5;
+  }
+  .bulk-toolbar button {
+    border:none;
+    border-radius:10px;
+    padding:.35rem .7rem;
+    font-size:.8rem;
+    font-weight:600;
+    cursor:pointer;
+  }
+  .btn-danger {
+    background:#e55353;
+    color:#fff;
   }
 
   .section-title {
@@ -205,118 +230,136 @@
         </div>
       </div>
 
-      <div class="chat-thread">
-        {# 1) Entradas del usuario como mensajes #}
-        {% if entries %}
-          {% for e in entries %}
+      {# FORMULARIO para borrado múltiple #}
+      <form method="post" action="{% url 'journal:entries_bulk_delete' %}" id="bulk-delete-form">
+        {% csrf_token %}
+
+        <div class="bulk-toolbar">
+          <div>
+            <label>
+              <input type="checkbox" id="select-all-checkbox">
+              Seleccionar todo / ninguno
+            </label>
+          </div>
+          <div>
+            <button type="submit" class="btn-danger" onclick="return confirm('¿Eliminar todas las entradas seleccionadas?');">
+              🗑️ Eliminar seleccionadas
+            </button>
+          </div>
+        </div>
+
+        <div class="chat-thread">
+          {# Entradas del usuario como mensajes #}
+          {% if entries %}
+            {% for e in entries %}
+              <div class="chat-message">
+                <div class="entry-checkbox">
+                  <input type="checkbox" name="selected_entries" value="{{ e.id }}" class="entry-checkbox-item">
+                </div>
+                <div class="chat-avatar user">Tú</div>
+                <div class="chat-bubble">
+                  <div class="chat-meta">
+                    <span>{{ e.created_at|date:"Y-m-d H:i" }}</span>
+                    <span class="entry-tools">
+                      <a href="{% url 'journal:entry_edit' e.id %}">Editar</a>
+                    </span>
+                  </div>
+                  <div>{{ e.content }}</div>
+                </div>
+              </div>
+            {% endfor %}
+          {% else %}
             <div class="chat-message">
               <div class="chat-avatar user">Tú</div>
               <div class="chat-bubble">
-                <div class="chat-meta">
-                  <span>{{ e.created_at|date:"Y-m-d H:i" }}</span>
-                  <span class="entry-actions">
-                    <a href="{% url 'journal:entry_edit' e.id %}">Editar</a>
-                    <form method="post" action="{% url 'journal:entry_delete' e.id %}" style="display:inline;" onsubmit="return confirm('¿Seguro que quieres eliminar esta entrada?');">
-                      {% csrf_token %}
-                      <button type="submit">Eliminar</button>
-                    </form>
-                  </span>
-                </div>
-                <div>{{ e.content }}</div>
+                <div class="chat-meta">Sin mensajes aún</div>
+                <div>Empieza escribiendo cómo te sientes hoy. Luego podrás pedirle a Inner Light AI que analice todo tu proceso.</div>
               </div>
             </div>
-          {% endfor %}
-        {% else %}
-          <div class="chat-message">
-            <div class="chat-avatar user">Tú</div>
-            <div class="chat-bubble">
-              <div class="chat-meta">Sin mensajes aún</div>
-              <div>Empieza escribiendo cómo te sientes hoy. Luego podrás pedirle a Inner Light AI que analice todo tu proceso.</div>
-            </div>
-          </div>
-        {% endif %}
+          {% endif %}
 
-        {# 2) Respuesta de la IA (último análisis) #}
-        {% if analysis_error %}
-          <div class="chat-message">
-            <div class="chat-avatar ai">IL</div>
-            <div class="chat-bubble ai">
-              <div class="section-title">Error en el análisis</div>
-              <p>{{ analysis_error }}</p>
+          {# Respuesta de la IA (último análisis) #}
+          {% if analysis_error %}
+            <div class="chat-message">
+              <div class="chat-avatar ai">IL</div>
+              <div class="chat-bubble ai">
+                <div class="section-title">Error en el análisis</div>
+                <p>{{ analysis_error }}</p>
+              </div>
             </div>
-          </div>
-        {% elif analysis_data %}
-          <div class="chat-message">
-            <div class="chat-avatar ai">IL</div>
-            <div class="chat-bubble ai">
-              <div class="chat-meta">
-                <span>Análisis espiritual generado</span>
-                {% if last_analysis_dt %}
-                  <span>{{ last_analysis_dt|date:"Y-m-d H:i" }}</span>
+          {% elif analysis_data %}
+            <div class="chat-message">
+              <div class="chat-avatar ai">IL</div>
+              <div class="chat-bubble ai">
+                <div class="chat-meta">
+                  <span>Análisis espiritual generado</span>
+                  {% if last_analysis_dt %}
+                    <span>{{ last_analysis_dt|date:"Y-m-d H:i" }}</span>
+                  {% endif %}
+                </div>
+
+                {% if analysis_data.estado_emocional_central %}
+                  <div class="section-title">Estado emocional central</div>
+                  <p>{{ analysis_data.estado_emocional_central }}</p>
+                {% endif %}
+
+                {% if analysis_data.patrones_pensamiento %}
+                  <div class="section-title">Patrones de pensamiento predominantes</div>
+                  <ul class="section-list">
+                    {% for p in analysis_data.patrones_pensamiento %}
+                      <li>{{ p }}</li>
+                    {% endfor %}
+                  </ul>
+                {% endif %}
+
+                {% if analysis_data.creencias_limitantes %}
+                  <div class="section-title">Creencias limitantes</div>
+                  <ul class="section-list">
+                    {% for c in analysis_data.creencias_limitantes %}
+                      <li>{{ c }}</li>
+                    {% endfor %}
+                  </ul>
+                {% endif %}
+
+                {% if analysis_data.herida_emocional_raiz %}
+                  <div class="section-title">Herida emocional raíz</div>
+                  <p>{{ analysis_data.herida_emocional_raiz }}</p>
+                {% endif %}
+
+                {% if analysis_data.interpretacion_espiritual %}
+                  <div class="section-title">Interpretación espiritual</div>
+                  <p>{{ analysis_data.interpretacion_espiritual|linebreaks }}</p>
+                {% endif %}
+
+                {% if analysis_data.consejo_practico %}
+                  <div class="section-title">Consejo práctico</div>
+                  <p>{{ analysis_data.consejo_practico|linebreaks }}</p>
+                {% endif %}
+
+                {% if analysis_data.consejo_espiritual %}
+                  <div class="section-title">Consejo espiritual</div>
+                  <p>{{ analysis_data.consejo_espiritual|linebreaks }}</p>
+                {% endif %}
+
+                {% if analysis_data.meditacion_guiada %}
+                  <div class="section-title">Meditación guiada</div>
+                  <p>{{ analysis_data.meditacion_guiada|linebreaks }}</p>
+                {% endif %}
+
+                {% if analysis_data.raw_text %}
+                  <div class="section-title">Respuesta bruta de la IA (debug)</div>
+                  <pre style="font-size:.78rem; white-space:pre-wrap;">{{ analysis_data.raw_text }}</pre>
+                {% endif %}
+
+                {% if analysis_warning %}
+                  <div class="section-title">Nota</div>
+                  <p>{{ analysis_warning }}</p>
                 {% endif %}
               </div>
-
-              {% if analysis_data.estado_emocional_central %}
-                <div class="section-title">Estado emocional central</div>
-                <p>{{ analysis_data.estado_emocional_central }}</p>
-              {% endif %}
-
-              {% if analysis_data.patrones_pensamiento %}
-                <div class="section-title">Patrones de pensamiento predominantes</div>
-                <ul class="section-list">
-                  {% for p in analysis_data.patrones_pensamiento %}
-                    <li>{{ p }}</li>
-                  {% endfor %}
-                </ul>
-              {% endif %}
-
-              {% if analysis_data.creencias_limitantes %}
-                <div class="section-title">Creencias limitantes</div>
-                <ul class="section-list">
-                  {% for c in analysis_data.creencias_limitantes %}
-                    <li>{{ c }}</li>
-                  {% endfor %}
-                </ul>
-              {% endif %}
-
-              {% if analysis_data.herida_emocional_raiz %}
-                <div class="section-title">Herida emocional raíz</div>
-                <p>{{ analysis_data.herida_emocional_raiz }}</p>
-              {% endif %}
-
-              {% if analysis_data.interpretacion_espiritual %}
-                <div class="section-title">Interpretación espiritual</div>
-                <p>{{ analysis_data.interpretacion_espiritual|linebreaks }}</p>
-              {% endif %}
-
-              {% if analysis_data.consejo_practico %}
-                <div class="section-title">Consejo práctico</div>
-                <p>{{ analysis_data.consejo_practico|linebreaks }}</p>
-              {% endif %}
-
-              {% if analysis_data.consejo_espiritual %}
-                <div class="section-title">Consejo espiritual</div>
-                <p>{{ analysis_data.consejo_espiritual|linebreaks }}</p>
-              {% endif %}
-
-              {% if analysis_data.meditacion_guiada %}
-                <div class="section-title">Meditación guiada</div>
-                <p>{{ analysis_data.meditacion_guiada|linebreaks }}</p>
-              {% endif %}
-
-              {% if analysis_data.raw_text %}
-                <div class="section-title">Respuesta bruta de la IA (debug)</div>
-                <pre style="font-size:.78rem; white-space:pre-wrap;">{{ analysis_data.raw_text }}</pre>
-              {% endif %}
-
-              {% if analysis_warning %}
-                <div class="section-title">Nota</div>
-                <p>{{ analysis_warning }}</p>
-              {% endif %}
             </div>
-          </div>
-        {% endif %}
-      </div>
+          {% endif %}
+        </div>
+      </form>
     </div>
 
     <div class="input-card">
@@ -338,4 +381,17 @@
 
   </div>
 </div>
+
+<script>
+  // Seleccionar todo / ninguno
+  const selectAllCheckbox = document.getElementById('select-all-checkbox');
+  const itemCheckboxes = document.querySelectorAll('.entry-checkbox-item');
+
+  if (selectAllCheckbox) {
+    selectAllCheckbox.addEventListener('change', function () {
+      const checked = this.checked;
+      itemCheckboxes.forEach(cb => { cb.checked = checked; });
+    });
+  }
+</script>
 {% endblock %}
